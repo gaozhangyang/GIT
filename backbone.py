@@ -55,7 +55,7 @@ class Backbone:
     
     
     @classmethod
-    def show_with_set(self,sets,manifolds,savefile=None):
+    def show_with_set(self,sets,manifolds,savefile=None,title=None):
         colors={}
         colors.update({i:'C{}'.format(i) for i in range(len(sets))})
         plt.figure(figsize=(4, 4))
@@ -64,6 +64,8 @@ class Backbone:
                 plt.scatter(manifolds[i_M].points[:,0],manifolds[i_M].points[:,1],c=colors[i_cls])
 #                 plt.text(manifolds[i_M].center[0],manifolds[i_M].center[1],'{:.0f}'.format(i_M))
         plt.axis('equal')
+        if title:
+            plt.title(title)
         if savefile:
             plt.savefig(Path(savefile))
         plt.show()
@@ -88,7 +90,7 @@ class Backbone:
             ploter=plot_tools.Visualization(figroot)
             ploter.run(pnum,draw_tasks)
             Backbone.show_graph(W2,manifolds,figroot+'/{}.png'.format(X.shape[0]+1))
-            Backbone.show_with_set(Sets,manifolds,figroot+'/{}.png'.format(X.shape[0]+2))
+            Backbone.show_with_set(Sets,manifolds,figroot+'/{}.png'.format(X.shape[0]+2),title='k:{} search_n:{} ratio:{}'.format(k,search_n,ratio))
             ploter.SaveGIF('result',fps=fps)
 
         return W,W2,draw_tasks

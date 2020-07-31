@@ -68,7 +68,7 @@ class Backbone:
         if title:
             plt.title(title)
         if fileroot:
-            for i in range(5):
+            for i in range(15):
                 plt.savefig(Path(fileroot.format(fileidx+i)))
         plt.show()
         
@@ -91,8 +91,33 @@ class Backbone:
         if mp4:
             ploter=plot_tools.Visualization(figroot)
             ploter.run(pnum,draw_tasks)
-            Backbone.show_graph(W2,manifolds,fileroot=figroot+'/{}.png',fileidx=10000000)
-            Backbone.show_with_set(Sets,manifolds,fileroot=figroot+'/{}.png',fileidx=20000000,title='k:{} search_n:{} ratio:{}'.format(k,search_n,ratio))
+
+            plt.figure(figsize=(4, 4))
+            ax = plt.subplot(111)
+            ax.scatter(X[:,0], X[:,1],c=X[:,2])
+            plt.axis('equal')
+            for idx in range(5):
+                plt.savefig(figroot+'/{}.png'.format(idx-100))
+            plt.close()
+
+            
+            NC=len(manifolds)
+            color_list=['C{}'.format(i) for i in range(NC)]
+            
+            plt.figure(figsize=(4, 4))
+            for i in range(NC):
+                points=manifolds[i].points
+                centers=manifolds[i].center
+                plt.scatter(points[:,0],points[:,1],c=color_list[i])
+                plt.text(centers[0],centers[1],str(i))
+            plt.axis('equal')
+            for idx in range(5):
+                plt.savefig(figroot+'/{}.png'.format(10000000+idx))
+            plt.close()
+
+            Backbone.show_graph(W,manifolds,fileroot=figroot+'/{}.png',fileidx=20000000)
+            Backbone.show_graph(W2,manifolds,fileroot=figroot+'/{}.png',fileidx=30000000)
+            Backbone.show_with_set(Sets,manifolds,fileroot=figroot+'/{}.png',fileidx=40000000,title='k:{} search_n:{} ratio:{}'.format(k,search_n,ratio))
             ploter.SaveGIF(mp4name,fps=fps)
 
         return W,W2,draw_tasks

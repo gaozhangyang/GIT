@@ -144,7 +144,8 @@ class GIFPloter():
                 if i % 1 == 0:
                     gif_images.append(imageio.imread(path+'/'+path_))
                     
-        imageio.mimsave(path+'/'+"{}.mp4".format(name), gif_images, fps=fps)
+        imageio.mimsave(path+'/'+"{}.gif".format(name), gif_images, fps=fps)
+
 
 class Visualization(GIFPloter):
     def __init__(self,root):

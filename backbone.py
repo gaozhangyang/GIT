@@ -41,7 +41,7 @@ class Backbone:
         return W
     
     @classmethod
-    def show_graph(self,W,manifolds,savefile=None):
+    def show_graph(self,W,manifolds,fileroot=None,fileidx=1000):
         plt.figure(figsize=(4, 4))
         tmp_G=nx.from_numpy_matrix(W)
         pos={i:(manifolds[i].center[0],manifolds[i].center[1]) for i in range(len(manifolds)) }
@@ -50,12 +50,13 @@ class Backbone:
         edge_labels={key:'{:.2f}'.format(val) for key,val in edge_labels.items()}
         nx.draw_networkx_edge_labels(tmp_G, pos, edge_labels=edge_labels)
         plt.axis('equal')
-        if savefile:
-            plt.savefig(Path(savefile))
+        if fileroot:
+            for i in range(5):
+                plt.savefig(Path(fileroot.format(fileidx+i)))
     
     
     @classmethod
-    def show_with_set(self,sets,manifolds,savefile=None,title=None):
+    def show_with_set(self,sets,manifolds,fileroot=None,fileidx=1000,title=None):
         colors={}
         colors.update({i:'C{}'.format(i) for i in range(len(sets))})
         plt.figure(figsize=(4, 4))
@@ -66,13 +67,14 @@ class Backbone:
         plt.axis('equal')
         if title:
             plt.title(title)
-        if savefile:
-            plt.savefig(Path(savefile))
+        if fileroot:
+            for i in range(5):
+                plt.savefig(Path(fileroot.format(fileidx+i)))
         plt.show()
         
     
     @classmethod
-    def fit(self,X,k,search_n,level=0,ratio=None,pnum=8,fps=2,mp4=False,figroot='./figs'):
+    def fit(self,X,k,search_n,level=0,ratio=None,pnum=8,fps=2,mp4=False,figroot='./figs',mp4name='circles'):
         plot_tools.autoPlot(X[:,:2],np.zeros(X.shape[0]).astype(np.int))
 
         manifolds,M_connection,P2M,draw_tasks=Manifold.get_manifolds(X,k,search_n)
@@ -89,8 +91,8 @@ class Backbone:
         if mp4:
             ploter=plot_tools.Visualization(figroot)
             ploter.run(pnum,draw_tasks)
-            Backbone.show_graph(W2,manifolds,figroot+'/{}.png'.format(X.shape[0]+1))
-            Backbone.show_with_set(Sets,manifolds,figroot+'/{}.png'.format(X.shape[0]+2),title='k:{} search_n:{} ratio:{}'.format(k,search_n,ratio))
-            ploter.SaveGIF('result',fps=fps)
+            Backbone.show_graph(W2,manifolds,fileroot=figroot+'/{}.png',fileidx=10000000)
+            Backbone.show_with_set(Sets,manifolds,fileroot=figroot+'/{}.png',fileidx=20000000,title='k:{} search_n:{} ratio:{}'.format(k,search_n,ratio))
+            ploter.SaveGIF(mp4name,fps=fps)
 
         return W,W2,draw_tasks

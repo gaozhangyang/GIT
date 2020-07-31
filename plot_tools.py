@@ -155,7 +155,6 @@ class Visualization(GIFPloter):
     def callback(self,task,pid,Process_state):
         X, (root,B_mask) ,idx=task
         
-       
         colors=np.array(['gray']*root.shape[0])
         for rt in list(set(root)):
             selected=np.nonzero(root==rt)[0].tolist()

@@ -67,6 +67,7 @@ class Manifold:
         index=0
         connection=[]
         draw_tasks=[]
+        draw_step=int(X.shape[0]//100)
         while len(idx)>0:
             index+=1
             i=idx[0] #取密度最高的点i
@@ -82,7 +83,7 @@ class Manifold:
             if j is not None: # 父亲节点被找到
                 US.join(j,i) # i的父亲是j，建立连接
             
-            if index%10==0:
+            if index%draw_step==0:
                 draw_tasks.append( (X[:,:2],US.flatten(US),index) )
 
             if tmp_idx.shape[0]>1:

@@ -168,22 +168,15 @@ class Manifold:
         return new_manifolds,points,pIDs
     
     @classmethod
-    def get_scale(self,X):
-        x=X[:,:2]
-        sigma=np.sqrt(np.var(x))
-        scale=(4*sigma**5/(3*x.shape[0]))**0.2
-        return scale
-
-    
-    @classmethod
     def get_manifolds(self,X,k,search_n=30):
         isShow=False
         Union=False
 
-        Dis=Point_Distance(X[:,:2],param=k+1)
-        D, I=Dis.get_DI(X[:,:2],param=k+1)#D,I:(N,k)  D:distance of neighbors I: index of neighbors
+        Dis=Point_Distance(X[:,:-2],param=k+1)
+        D, I=Dis.get_DI(X[:,:-2],param=k+1)#D,I:(N,k)  D:distance of neighbors I: index of neighbors
         P=Dis.get_density(D) #计算点的密度
-        P=(P-np.min(P))/(np.max(P)-np.min(P))
+        print(P)
+        P=(P-np.min(P))/(np.max(P)-np.min(P)+1e-10)
         X[:,-2]=P
         manifolds,M_connection,P2M,draw_tasks=Manifold.detect_descending_manifolds(X,D,I,k=search_n,isShow=isShow,Union=Union)
         return manifolds,M_connection,P2M,draw_tasks

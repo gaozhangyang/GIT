@@ -8,7 +8,7 @@ class Point_Distance():
     def __init__(self,dataset,param):
         self.dataset=dataset
 #         self.A=1/np.sqrt( self.get_scales(self.dataset[:,:2]) )
-        self.A=1/ np.array(self.get_scales(self.dataset[:,:2]))
+        self.A=1/ np.array(self.get_scales(self.dataset))
         self.param=param+1
     
     def get_scales(self,X_observed):
@@ -18,15 +18,15 @@ class Point_Distance():
 
         for i in range(X_.shape[1]):
             sigma=np.sqrt(np.var(X_[:,i]))
-#             scale=(4*sigma**5/(3*X_[:,i].shape[0]))**0.2
-            scale=1.5*sigma*X_.shape[0]**(-0.2)
+            scale=(4*sigma**5/(3*X_[:,i].shape[0]))**0.2
+            # scale=1.05*sigma*X_.shape[0]**(-0.2)
             Sigma_.append(sigma)
             Scale_.append(scale)
         return Scale_
     
     def get_DI(self,X,param):
         A=np.diag(self.A)
-        D_mat=scipy.spatial.distance_matrix(np.matmul(X,A),np.matmul(self.dataset[:,:2],A))
+        D_mat=scipy.spatial.distance_matrix(np.matmul(X,A),np.matmul(self.dataset,A))
         index=np.argsort(D_mat,axis=1)
         I=index[:,:param]
         D=np.zeros_like(I,dtype=np.float)

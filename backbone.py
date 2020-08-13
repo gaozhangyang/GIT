@@ -74,8 +74,12 @@ class Backbone:
         
     
     @classmethod
-    def fit(self,X,k,search_n,level=0,ratio=None,pnum=8,fps=2,mp4=False,figroot='./figs',mp4name='circles'):
-        plot_tools.autoPlot(X[:,:2],np.zeros(X.shape[0]).astype(np.int))
+    def fit(self,X,k,search_n,level=0,ratio=0,pnum=8,fps=2,mp4=False,figroot='./figs',mp4name='circles'):
+        extend=np.zeros((X.shape[0],2))
+        extend[:,1]=range(0,X.shape[0])
+        X=np.hstack([X,extend])
+        
+        plot_tools.autoPlot(X[:,:-2],np.zeros(X.shape[0]).astype(np.int))
 
         manifolds,M_connection,P2M,draw_tasks=Manifold.get_manifolds(X,k,search_n)
         Manifold.show(manifolds)
@@ -88,13 +92,22 @@ class Backbone:
         Sets=list(nx.connected_components(tmp_G))
         Backbone.show_with_set(Sets,manifolds)
 
+        Y_=np.zeros(X.shape[0])
+        NC=len(manifolds)
+        for i in range(NC):
+            points=manifolds[i].points
+            M=points.shape[0]
+            Y_[points[:,-1].astype(np.int)]=i
+            
+
+
         if mp4:
             ploter=plot_tools.Visualization(figroot)
             ploter.run(pnum,draw_tasks)
 
             plt.figure(figsize=(4, 4))
             ax = plt.subplot(111)
-            ax.scatter(X[:,0], X[:,1],c=X[:,2])
+            ax.scatter(X[:,0], X[:,1],c=X[:,-2])
             plt.axis('equal')
             for idx in range(5):
                 plt.savefig(figroot+'/{}.png'.format(idx-100))
@@ -120,4 +133,4 @@ class Backbone:
             Backbone.show_with_set(Sets,manifolds,fileroot=figroot+'/{}.png',fileidx=40000000,title='k:{} search_n:{} ratio:{}'.format(k,search_n,ratio))
             ploter.SaveGIF(mp4name,fps=fps)
 
-        return W,W2,draw_tasks
+        return X[:,:-2],Y_,X[:,-2],W2

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import savefig
 import numpy as np
 import networkx as nx
-from meta_manifolds import Manifold
+from detect_local_mode import Manifold
 import plot_tools
 from pathlib import Path
 
@@ -11,25 +11,40 @@ class Backbone:
         pass
     
     @classmethod
-    def distance_Ms(self, manifolds, M_connection, level, use_P=True):
-        epsilon=1e-10
-        M_num=len(manifolds)
-        W=np.zeros((M_num,M_num))
-        M_connection=sorted(M_connection,key=lambda x:x[2],reverse=True)
-        for i in range(len(M_connection)):
-            if M_connection[i][2]>level:
-                M1,M2,P=M_connection[i]
-                W[M1,M2]+=P
+    def mean_center(self,X_extend,idx):
+        left,right=idx[:,0],idx[:,1]
+        new_pos=[]
+        for dim in range(X_extend.shape[1]-2):
+            new_pos.append(((X_extend[left,dim]+X_extend[right,dim])/2).reshape(-1,1))
+        return np.hstack(new_pos)
 
-                if use_P:
-                    PM1=np.mean(manifolds[M1].points[:,-2])
-                    PM2=np.mean(manifolds[M2].points[:,-2])
-                    W[M1,M2]*=min(PM1/PM2,PM2/PM1)
-                    
-                W[M2,M1]=W[M1,M2]
-        
-        return W
+    @classmethod
+    def connectivity(self,i,j,K_d,Dis,BoundaryMat_E,X_extend,manifolds):
+        BE=BoundaryMat_E[i,j]
+        if BE.shape[0]==0:
+            return 0
+        P_mid,D,I=Dis.get_density(Backbone.mean_center(X_extend,BE),K_d+1,train=True)
+        # P_left,D,I=Dis.get_density(X_extend[BE[:,0],:-2],K_d+1,train=True)
+        # P_right,D,I=Dis.get_density(X_extend[BE[:,1],:-2],K_d+1,train=True)
+        # P=np.min( np.hstack([P_left.reshape(-1,1),P_mid.reshape(-1,1),P_right.reshape(-1,1)]),axis=1 )
+        # P = P_left*P_mid*P_right
+        P=P_mid
+
+        P1=manifolds[i].center[-2]#np.mean(manifolds[i].points[:,-2])
+        P2=manifolds[j].center[-2]#np.mean(manifolds[j].points[:,-2])
+        return np.sum(P**2)*min(P1/P2,P2/P1)**2
     
+    @classmethod
+    def get_boundary(self,connection,manifolds):
+        connection=np.array(connection)
+        BoundaryMat_E=np.zeros((len(manifolds),len(manifolds)),dtype=set)
+        for i in range(len(manifolds)):
+            for j in range(i+1,len(manifolds)):
+                maski2j = (connection[:,2]==manifolds[i].rt) & (connection[:,3]==manifolds[j].rt)
+                maskj2i = (connection[:,2]==manifolds[j].rt) & (connection[:,3]==manifolds[i].rt)
+                BoundaryMat_E[i,j] = BoundaryMat_E[j,i] =connection[maski2j|maskj2i,:2]
+        return BoundaryMat_E
+
     @classmethod
     def cut_graph(self,W,ratio):
         W=W.copy()
@@ -74,45 +89,63 @@ class Backbone:
         
     
     @classmethod
-    def fit(self,X,k,search_n,level=0,ratio=0,pnum=8,fps=2,mp4=False,figroot='./figs',mp4name='circles'):
+    def fit(self,X,K_d,search_n,level=0.99,ratio=0,pnum=8,fps=2,mp4=False,figroot='./figs',mp4name='circles'):
         extend=np.zeros((X.shape[0],2))
         extend[:,1]=range(0,X.shape[0])
-        X=np.hstack([X,extend])
+        X_extend=np.hstack([X,extend])
         
-        plot_tools.autoPlot(X[:,:-2],np.zeros(X.shape[0]).astype(np.int))
+        ############KDE//noise detecting//local mode###########
+        # show raw data
+        plot_tools.autoPlot(X_extend[:,:-2],np.zeros(X_extend.shape[0]).astype(np.int))
 
-        manifolds,M_connection,P2M,draw_tasks=Manifold.get_manifolds(X,k,search_n)
+        Dis,manifolds,connection,noise,P2M,draw_tasks=Manifold.get_manifolds(X_extend,K_d,level,search_n)
+        # show local modes
         Manifold.show(manifolds)
 
-        W=Backbone.distance_Ms(manifolds,M_connection,level=level,use_P=True)
-        W2=Backbone.cut_graph(W,ratio)
-        Backbone.show_graph(W2,manifolds)
+        noise_manifold=manifolds[0] # noise manifold
+        manifolds=manifolds[1:] # useful manifold
 
-        tmp_G=nx.from_numpy_matrix(W2)
+        ######################topological graph###############
+        # construct topological graph
+        connection=np.array(connection)
+        BoundaryMat_E=Backbone.get_boundary(connection,manifolds)
+        ConnectMat=np.zeros([len(manifolds),len(manifolds)])
+        for i in range(len(manifolds)):
+            for j in range(i+1,len(manifolds)):
+                ConnectMat[i,j]=ConnectMat[j,i]=Backbone.connectivity(i,j,K_d,Dis,BoundaryMat_E,X_extend,manifolds)
+        # show topological graph
+        Backbone.show_graph(ConnectMat,manifolds)
+
+        #########################prune graph#############
+        W=Backbone.cut_graph(ConnectMat,ratio)
+        # show Backbone
+        Backbone.show_graph(W,manifolds)
+
+        tmp_G=nx.from_numpy_matrix(W)
         Sets=list(nx.connected_components(tmp_G))
+        # show clustering results
         Backbone.show_with_set(Sets,manifolds)
 
-        Y_=np.zeros(X.shape[0])
+        ##########################pred###################
+        Y_=np.zeros(X_extend.shape[0])
         NC=len(manifolds)
         for i in range(NC):
             points=manifolds[i].points
             M=points.shape[0]
             Y_[points[:,-1].astype(np.int)]=i
+        Y_[noise]=-1
             
-
-
         if mp4:
             ploter=plot_tools.Visualization(figroot)
             ploter.run(pnum,draw_tasks)
 
             plt.figure(figsize=(4, 4))
             ax = plt.subplot(111)
-            ax.scatter(X[:,0], X[:,1],c=X[:,-2])
+            ax.scatter(X_extend[:,0], X_extend[:,1],c=X_extend[:,-2])
             plt.axis('equal')
             for idx in range(5):
                 plt.savefig(figroot+'/{}.png'.format(idx-100))
             plt.close()
-
             
             NC=len(manifolds)
             color_list=['C{}'.format(i) for i in range(NC)]
@@ -128,9 +161,9 @@ class Backbone:
                 plt.savefig(figroot+'/{}.png'.format(10000000+idx))
             plt.close()
 
-            Backbone.show_graph(W,manifolds,fileroot=figroot+'/{}.png',fileidx=20000000)
-            Backbone.show_graph(W2,manifolds,fileroot=figroot+'/{}.png',fileidx=30000000)
+            Backbone.show_graph(ConnectMat,manifolds,fileroot=figroot+'/{}.png',fileidx=20000000)
+            Backbone.show_graph(W,manifolds,fileroot=figroot+'/{}.png',fileidx=30000000)
             Backbone.show_with_set(Sets,manifolds,fileroot=figroot+'/{}.png',fileidx=40000000,title='k:{} search_n:{} ratio:{}'.format(k,search_n,ratio))
             ploter.SaveGIF(mp4name,fps=fps)
 
-        return X[:,:-2],Y_,X[:,-2],W2
+        return X_extend[:,:-2],Y_,X_extend[:,-2],W

@@ -42,11 +42,17 @@ class Point_Distance():
             W[i,I[i]]=D[i]
         return W
     
-    def get_density(self,D):
+    def get_density(self,X,k,train=False):
+        D, I=self.get_DI(X,param=k)
+
         EXP=np.exp(-D**2)
 #         density=np.mean(EXP*np.prod(self.A**2)/np.sqrt(2*np.pi),axis=1)
-        density=np.mean(EXP,axis=1)
-        return density
+        P=np.mean(EXP,axis=1)
+        if train:
+            self.maxP=np.max(P)
+            self.minP=np.min(P)
+        P=(P-self.minP)/(self.maxP-self.minP+1e-10)
+        return P,D,I
     
     def detect_graph_neighbor(self,center,D,I,k):
         record=np.zeros(D.shape[0])

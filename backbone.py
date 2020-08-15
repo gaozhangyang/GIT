@@ -24,15 +24,10 @@ class Backbone:
         if BE.shape[0]==0:
             return 0
         P_mid,D,I=Dis.get_density(Backbone.mean_center(X_extend,BE),K_d+1,train=True)
-        # P_left,D,I=Dis.get_density(X_extend[BE[:,0],:-2],K_d+1,train=True)
-        # P_right,D,I=Dis.get_density(X_extend[BE[:,1],:-2],K_d+1,train=True)
-        # P=np.min( np.hstack([P_left.reshape(-1,1),P_mid.reshape(-1,1),P_right.reshape(-1,1)]),axis=1 )
-        # P = P_left*P_mid*P_right
-        P=P_mid
 
         P1=manifolds[i].center[-2]#np.mean(manifolds[i].points[:,-2])
         P2=manifolds[j].center[-2]#np.mean(manifolds[j].points[:,-2])
-        return np.sum(P**2)*min(P1/P2,P2/P1)**2
+        return np.sum(P_mid**2)*min(P1/P2,P2/P1)**2
     
     @classmethod
     def get_boundary(self,connection,manifolds):

@@ -79,10 +79,12 @@ class Manifold:
             i=idx[0] #取密度最高的点i
             
             idx_iN=I[i,1:K_d+1] # 距离约束，取k近邻的索引值
-            tmp_idx=idx_iN[f[idx_iN]>f[i]] # 对k近邻施加密度约束,使得选择的近邻点的密度都大于当前点
+            mask = f[idx_iN]>f[i]
+            tmp_idx=idx_iN[mask] # 对k近邻施加密度约束,使得选择的近邻点的密度都大于当前点
 
             if tmp_idx.shape[0]>0:
-                j=tmp_idx[0] # 父亲节点被找到
+                grad=(f[tmp_idx]-f[i])/(D[i,1:K_d+1][mask])
+                j=tmp_idx[np.argmax(grad)]
             else:
                 j=None # 父亲节点没有被找到
 
@@ -120,10 +122,6 @@ class Manifold:
             P2M.update({int(point):N for point in X[index,-1]})
             manifolds.append(M)
             N+=1
-        
-        # M_connection=[]
-        # for i,j,p in connection:
-        #     M_connection.append((P2M[i],P2M[j],p))
             
         return manifolds,connection,noise,P2M,draw_tasks
     

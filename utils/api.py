@@ -1,6 +1,7 @@
 from networkx.readwrite.json_graph import tree
 import numpy as np
 import networkx as nx
+from numpy import random
 from detect_local_mode import Manifold
 from topo_graph import TopoGraph
 import plot_tools
@@ -50,16 +51,22 @@ class DGSFC:
         Sets=list(nx.connected_components(tmp_G))
 
         ##########################pred###################
-        X2=[]
-        Y2=[]
+        M2C={}
         for c in range(len(Sets)):
-            for idx in list(Sets[c]):
-                X2.append(real_manifolds[idx].points[:,:-2])
-                Y2.append(np.ones([real_manifolds[idx].points.shape[0],1])*c)
-        X2.append(noise_manifold.points[:,:-2])
-        Y2.append(-np.ones([noise_manifold.points.shape[0],1]))
-        X2=np.vstack(X2)
-        Y2=np.vstack(Y2).astype(np.int)
+            for m in list(Sets[c]):
+                M2C.update({m:c})
+        
+        classify={i:[] for i in range(len(Sets))}
+        for m in range(len(real_manifolds)):
+            classify[M2C[m]]+=real_manifolds[m].pID.tolist()
+        
+        classify.update({-1:noise_manifold.pID.tolist()})
+
+        Y=np.zeros(X_extend.shape[0])
+        for c in classify.keys():
+            Y[classify[c]]=c
+        Y=Y.astype(np.int)
+        
 
 
         ########################plot######################
@@ -68,16 +75,16 @@ class DGSFC:
             plot_tools.autoPlot(X_extend[:,:-2],np.zeros(X_extend.shape[0]).astype(np.int))
 
             # show local modes
-            plot_tools.PaperGraph.show_manifolds(manifolds)
+            plot_tools.PaperGraph.show_manifolds(manifolds,X_extend)
 
             # show topological graph
-            plot_tools.PaperGraph.show_topo_graph(ConnectMat,real_manifolds)
+            plot_tools.PaperGraph.show_topo_graph(ConnectMat,real_manifolds,X_extend)
 
             # show TopoGraph
-            plot_tools.PaperGraph.show_topo_graph(W,real_manifolds)
+            plot_tools.PaperGraph.show_topo_graph(W,real_manifolds,X_extend)
 
             # show clustering results
-            plot_tools.autoPlot(X2,Y2)
+            plot_tools.autoPlot(X_extend[:,:-2],Y)
 
             
         if mp4:
@@ -111,4 +118,4 @@ class DGSFC:
             plot_tools.PaperGraph.show_point_with_clusters(Sets,manifolds,fileroot=figroot+'/{}.png',fileidx=40000000,title='k:{} search_n:{} ratio:{}'.format(k,search_n,ratio))
             ploter.SaveGIF(mp4name,fps=fps)
 
-        return X2,Y2,X_extend[:,-2],W
+        return Y,Sets,

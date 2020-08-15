@@ -183,7 +183,7 @@ class PaperGraph:
         pass
 
     @classmethod
-    def show_manifolds(self,manifolds,mode='points',seed=2020):
+    def show_manifolds(self,manifolds,X_extend,seed=2020):
         NC=len(manifolds)
         color_list=['gray']
         color_add=['C{}'.format(i) for i in range(NC)]
@@ -192,27 +192,24 @@ class PaperGraph:
         color_list=color_list+color_add
         
         fig=plt.figure(figsize=(4, 4))
-        if mode=='points':
-            for i in range(NC):
-                points=manifolds[i].points
-                centers=manifolds[i].center
-                plt.scatter(points[:,0],points[:,1],c=color_list[i])
-                plt.text(centers[0],centers[1],str(i))
-                
-        if mode=='center':
-            for i in range(NC):
-                points=manifolds[i].center
-                plt.scatter(points[0],points[1],c=color_list[i])
-                plt.text(points[0],points[1],str(i))
+        for i in range(NC):
+            points=X_extend[manifolds[i].pID,:-2]
+            centers=np.mean(points,axis=0)
+            plt.scatter(points[:,0],points[:,1],c=color_list[i])
+            plt.text(centers[0],centers[1],str(i))
         
         _=plt.axis('equal')
     
 
     @classmethod
-    def show_topo_graph(self,W,manifolds,fileroot=None,fileidx=1000):
+    def show_topo_graph(self,W,manifolds,X_extend,fileroot=None,fileidx=1000):
         plt.figure(figsize=(4, 4))
         tmp_G=nx.from_numpy_matrix(W)
-        pos={i:(manifolds[i].center[0],manifolds[i].center[1]) for i in range(len(manifolds)) }
+        centers=[]
+        for i in range(len(manifolds)):
+            centers.append(np.mean(X_extend[manifolds[i].pID,:-2],axis=0))
+
+        pos={i:(centers[i][0],centers[i][1]) for i in range(len(manifolds)) }
         nx.draw_networkx(tmp_G,pos)
         edge_labels = nx.get_edge_attributes(tmp_G, 'weight')
         edge_labels={key:'{:.2f}'.format(val) for key,val in edge_labels.items()}
@@ -223,20 +220,20 @@ class PaperGraph:
                 plt.savefig(Path(fileroot.format(fileidx+i)))
     
 
-    @classmethod
-    def show_point_with_clusters(self,sets,manifolds,fileroot=None,fileidx=1000,title=None):
-        colors={}
-        colors.update({i:'C{}'.format(i) for i in range(len(sets))})
-        plt.figure(figsize=(4, 4))
-        for i_cls,oneset in enumerate(sets):
-            for i_M in list(oneset):
-                plt.scatter(manifolds[i_M].points[:,0],manifolds[i_M].points[:,1],c=colors[i_cls])
-#                 plt.text(manifolds[i_M].center[0],manifolds[i_M].center[1],'{:.0f}'.format(i_M))
-        plt.axis('equal')
-        if title:
-            plt.title(title)
-        if fileroot:
-            for i in range(15):
-                plt.savefig(Path(fileroot.format(fileidx+i)))
-        plt.show()
+#     @classmethod
+#     def show_point_with_clusters(self,sets,manifolds,fileroot=None,fileidx=1000,title=None):
+#         colors={}
+#         colors.update({i:'C{}'.format(i) for i in range(len(sets))})
+#         plt.figure(figsize=(4, 4))
+#         for i_cls,oneset in enumerate(sets):
+#             for i_M in list(oneset):
+#                 plt.scatter(manifolds[i_M].points[:,0],manifolds[i_M].points[:,1],c=colors[i_cls])
+# #                 plt.text(manifolds[i_M].center[0],manifolds[i_M].center[1],'{:.0f}'.format(i_M))
+#         plt.axis('equal')
+#         if title:
+#             plt.title(title)
+#         if fileroot:
+#             for i in range(15):
+#                 plt.savefig(Path(fileroot.format(fileidx+i)))
+#         plt.show()
     

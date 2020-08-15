@@ -32,8 +32,8 @@ class TopoGraph:
             return 0
         P_mid,D,I=Dis.get_density(TopoGraph.mean_center(X_extend,BE),K_d+1,train=True)
 
-        P1=manifolds[i].center[-2]#np.mean(manifolds[i].points[:,-2])
-        P2=manifolds[j].center[-2]#np.mean(manifolds[j].points[:,-2])
+        P1=X_extend[manifolds[i].rt,-2]
+        P2=X_extend[manifolds[j].rt,-2]
         return np.sum(P_mid**2)*min(P1/P2,P2/P1)**2
     
     @classmethod

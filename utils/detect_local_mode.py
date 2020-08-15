@@ -43,14 +43,12 @@ class Union_Search():
 
 class Manifold:
     def __init__(self):
-        self.points=np.zeros((10,4))#倒数第二维:P 最后一维:ID
-        self.center=np.mean(self.points,axis=0)
+        self.pID=np.zeros(10)
         self.name=''
         self.rt=None
     
-    def update(self,points,name,rt):
-        self.points=points
-        self.center=np.mean(self.points,axis=0)
+    def update(self,pID,name,rt):
+        self.pID=pID
         self.name=name
         self.rt=rt
     
@@ -109,7 +107,7 @@ class Manifold:
         for i in sorted(list(set(root))):
             M=Manifold()
             index=np.nonzero(root==i)[0]
-            M.update(X[index],str(N),i)
+            M.update(X[index,-1].astype(np.int),str(N),i)
             P2M.update({int(point):N for point in X[index,-1]})
             manifolds.append(M)
             N+=1

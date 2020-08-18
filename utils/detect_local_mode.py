@@ -29,7 +29,7 @@ class Union_Search():
             root=self.pre.copy()
         else:
             root=root.copy()
-            
+        
         for x in range(root.shape[0]):
             rt=US.find(x,root)
             now=x
@@ -37,8 +37,8 @@ class Union_Search():
                 parent=root[now]
                 root[now]=rt
                 now=parent
-                
-        return root 
+
+        return root
 
 
 class Manifold:
@@ -53,19 +53,22 @@ class Manifold:
         self.rt=rt
     
     @classmethod
-    def detect_descending_manifolds(self,X,D,I,K_d,level,isShow=False,Union=False):
+    def detect_descending_manifolds(self,X,D,I,K_d,epsilon,isShow=False,Union=False):
         f=X[:,-2]
         idx=np.argsort(f).tolist()
         idx.reverse() #从大到小排序f
         US=Union_Search(D.shape[0])# D:(N,k) 初始化Union_Search结构，共N个点
+        US_show=Union_Search(D.shape[0]) # 没有噪音点，显示密度增长过程
         index=0
         connection=[]
         draw_tasks=[]
         noise=[]
+        Back_mask = np.ones(X.shape[0])
         draw_step=int(X.shape[0]//100)
         while len(idx)>0:
             index+=1
             i=idx[0] #取密度最高的点i
+            Back_mask[i]=0
             
             idx_iN=I[i,1:K_d+1] # 距离约束，取k近邻的索引值
             mask = f[idx_iN]>f[i]
@@ -79,17 +82,18 @@ class Manifold:
 
             if j is not None: # 父亲节点被找到
                 rt0=US.find(j)
-                if f[rt0]-f[i]>level*f[rt0]:
+                if f[i]<epsilon*f[rt0]:
                     noise.append(i)
                 else:
                     US.join(j,i) # i的父亲是j，建立连接
+                US_show.join(j,i)
             
             if index%draw_step==0:
-                draw_tasks.append( (X[:,:2],US.flatten(US),index) )
+                draw_tasks.append( (X[:,:2],US_show.flatten(US_show),Back_mask.copy(),index) )
 
             
             if tmp_idx.shape[0]>1 and US.pre[i]!=-1:
-                if f[rt0]-f[i]<=level*f[rt0]:
+                if f[i]>=epsilon*f[rt0]:
                     # rt0=US.find(tmp_idx[0]) # i=tmp_idx[0]
                     for query in tmp_idx[1:]:
                         rt1=US.find(query)
@@ -97,6 +101,7 @@ class Manifold:
                             connection.append( (i,query,rt0,rt1) )
             idx.remove(i) #删除密度最高的点i
         
+        draw_tasks.append( (X[:,:2],US_show.flatten(US_show),Back_mask.copy(),index) )
         root=US.flatten(US,US.pre)
         for noise_i in noise:
             root[root==noise_i]=-1
@@ -111,11 +116,11 @@ class Manifold:
             P2M.update({int(point):N for point in X[index,-1]})
             manifolds.append(M)
             N+=1
-            
+        
         return manifolds,connection,noise,P2M,draw_tasks
     
     @classmethod
-    def get_manifolds(self,X_extend,K_d,level,search_n=30):
+    def get_manifolds(self,X_extend,K_d,epsilon,K_n=30):
         isShow=False
         Union=False
 
@@ -123,5 +128,5 @@ class Manifold:
         P,D,I =Dis.get_density(X_extend[:,:-2],K_d+1,train=True) #计算点的密度
         P=(P-np.min(P))/(np.max(P)-np.min(P)+1e-10)
         X_extend[:,-2]=P
-        manifolds,M_connection,noise,P2M,draw_tasks=Manifold.detect_descending_manifolds(X_extend,D,I,K_d=search_n,level=level,isShow=isShow,Union=Union)
+        manifolds,M_connection,noise,P2M,draw_tasks=Manifold.detect_descending_manifolds(X_extend,D,I,K_d=K_n,epsilon=epsilon,isShow=isShow,Union=Union)
         return Dis,manifolds,M_connection,noise,P2M,draw_tasks

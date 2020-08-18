@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import imageio
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import cla
 import networkx as nx
 import signal
 import abc
@@ -149,14 +150,17 @@ class GIFPloter():
         imageio.mimsave(path+'/'+"{}.gif".format(name), gif_images, fps=fps)
 
 
+
 class Visualization(GIFPloter):
-    def __init__(self,root):
+    def __init__(self,root,seed=2020):
         super(Visualization,self).__init__(root)
         self.color_list=['C{}'.format(i) for i in range(1,21)]
+        random.seed(seed)
+        random.shuffle(self.color_list)
         self.Cnum=len(self.color_list)
     
     def callback(self,task,pid,Process_state):
-        X, (root,B_mask) ,idx=task
+        X, root, B_mask ,idx=task
         
         colors=np.array(['gray']*root.shape[0])
         for rt in list(set(root)):
@@ -202,14 +206,19 @@ class PaperGraph:
     
 
     @classmethod
-    def show_topo_graph(self,W,manifolds,X_extend,fileroot=None,fileidx=1000):
+    def show_topo_graph(self,W,manifolds,X_extend=None,fileroot=None,fileidx=1000):
         plt.figure(figsize=(4, 4))
         tmp_G=nx.from_numpy_matrix(W)
-        centers=[]
-        for i in range(len(manifolds)):
-            centers.append(np.mean(X_extend[manifolds[i].pID,:-2],axis=0))
 
-        pos={i:(centers[i][0],centers[i][1]) for i in range(len(manifolds)) }
+        if X_extend is not None:
+            centers=[]
+            for i in range(len(manifolds)):
+                centers.append(np.mean(X_extend[manifolds[i].pID,:-2],axis=0))
+
+            pos={i:(centers[i][0],centers[i][1]) for i in range(len(manifolds)) }
+        else:
+            pos = nx.kamada_kawai_layout(tmp_G)
+
         nx.draw_networkx(tmp_G,pos)
         edge_labels = nx.get_edge_attributes(tmp_G, 'weight')
         edge_labels={key:'{:.2f}'.format(val) for key,val in edge_labels.items()}
@@ -219,6 +228,24 @@ class PaperGraph:
             for i in range(5):
                 plt.savefig(Path(fileroot.format(fileidx+i)))
     
+    @classmethod
+    def show_clusters(self,X,Y,fileroot=None,fileidx=1000,title=None):
+        C=int(np.max(Y))+1
+        colors={-1:'gray'}
+        colors.update({i:'C{}'.format(i) for i in range(C)})
+        plt.figure(figsize=(4, 4))
+        for c in range(-1,C):
+            mask= (Y==c)
+            if np.sum(mask) >0 :
+                plt.scatter(X[mask][:,0],X[mask][:,1],c=colors[c])
+        plt.axis('equal')
+
+        if title:
+            plt.title(title)
+        if fileroot:
+            for i in range(15):
+                plt.savefig(Path(fileroot.format(fileidx+i)))
+        # plt.show()
 
 #     @classmethod
 #     def show_point_with_clusters(self,sets,manifolds,fileroot=None,fileidx=1000,title=None):

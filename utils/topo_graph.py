@@ -48,11 +48,16 @@ class TopoGraph:
     #####################################################################
     #############################cut topo graph##########################
     @classmethod
-    def cut_graph(self,W,ratio):
+    def cut_graph(self,W,lamda):
+        # W=W.copy()
+        # R=W/np.max(W,axis=1)
+        # loss0=(1/beta-1)**2*R**2
+        # loss1=(R-1)**2
+        # mask_cut=loss0+loss0.T<loss1+loss1.T
+        # W[mask_cut]=0
+
         W=W.copy()
-        filter_mask=W/np.max(W,axis=1)<ratio
-        not_mask=(np.sum(W>0,axis=1)<=2).reshape(-1,1)
-        filter_mask=filter_mask*(~not_mask)
+        filter_mask=W/np.max(W,axis=1)<lamda
         W[filter_mask]=0
         W[filter_mask.T]=0
         return W

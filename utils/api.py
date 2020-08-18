@@ -9,6 +9,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import savefig
+import pickle
 
 class DGSFC:
     def __init__(self) -> None:
@@ -17,15 +18,16 @@ class DGSFC:
     @classmethod
     def fit(self,X,
                  K_d,
-                 search_n,
-                 level=1,
-                 ratio=0,
+                 K_n,
+                 epsilon=1,
+                 lamda=0,
                  plot=False,
                  pnum=8,
                  fps=2,
                  mp4=False,
                  figroot='./figs',
-                 mp4name='circles'
+                 mp4name='circles',
+                 draw_seed=2020
                  ):
                  
         extend=np.zeros((X.shape[0],2))
@@ -33,9 +35,13 @@ class DGSFC:
         X_extend=np.hstack([X,extend])
         
         ############KDE//noise detecting//local mode###########
-        Dis,manifolds,connection,noise,P2M,draw_tasks=Manifold.get_manifolds(X_extend,K_d,level,search_n)
-        noise_manifold=manifolds[0] # noise manifold
-        real_manifolds=manifolds[1:] # useful manifold
+        Dis,manifolds,connection,noise,P2M,draw_tasks=Manifold.get_manifolds(X_extend,K_d,epsilon,K_n)
+        if len(noise)==0:
+            noise_manifold=None
+            real_manifolds=manifolds
+        else:
+            noise_manifold=manifolds[0] # noise manifold
+            real_manifolds=manifolds[1:] # useful manifold
 
 
         ######################topological graph###############
@@ -46,7 +52,7 @@ class DGSFC:
         
 
         #########################prune graph#############
-        W=TopoGraph.cut_graph(ConnectMat,ratio)
+        W=TopoGraph.cut_graph(ConnectMat,lamda)
         tmp_G=nx.from_numpy_matrix(W)
         Sets=list(nx.connected_components(tmp_G))
 
@@ -60,7 +66,8 @@ class DGSFC:
         for m in range(len(real_manifolds)):
             classify[M2C[m]]+=real_manifolds[m].pID.tolist()
         
-        classify.update({-1:noise_manifold.pID.tolist()})
+        if noise_manifold:
+            classify.update({-1:noise_manifold.pID.tolist()})
 
         Y=np.zeros(X_extend.shape[0])
         for c in classify.keys():
@@ -71,25 +78,29 @@ class DGSFC:
 
         ########################plot######################
         if plot:
-            # show raw data
-            plot_tools.autoPlot(X_extend[:,:-2],np.zeros(X_extend.shape[0]).astype(np.int))
-
-            # show local modes
-            plot_tools.PaperGraph.show_manifolds(manifolds,X_extend)
-
-            # show topological graph
-            plot_tools.PaperGraph.show_topo_graph(ConnectMat,real_manifolds,X_extend)
-
-            # show TopoGraph
-            plot_tools.PaperGraph.show_topo_graph(W,real_manifolds,X_extend)
-
-            # show clustering results
-            plot_tools.autoPlot(X_extend[:,:-2],Y)
+            Dim=X_extend.shape[1]
+            if Dim<=4:
+                # show raw data
+                plot_tools.autoPlot(X_extend[:,:-2],np.zeros(X_extend.shape[0]).astype(np.int))
+                # show local modes
+                plot_tools.PaperGraph.show_manifolds(manifolds,X_extend)
+                # show topo-graph
+                plot_tools.PaperGraph.show_topo_graph(ConnectMat,real_manifolds,X_extend)
+                # show pruned topo-graph
+                plot_tools.PaperGraph.show_topo_graph(W,real_manifolds,X_extend)
+                # show clustering results
+                plot_tools.autoPlot(X_extend[:,:-2],Y)
+            else:
+                # show pruned topo-graph
+                plot_tools.PaperGraph.show_topo_graph(W,real_manifolds)
+                
 
             
         if mp4:
-            ploter=plot_tools.Visualization(figroot)
+            ploter=plot_tools.Visualization(figroot,seed=draw_seed)
             ploter.run(pnum,draw_tasks)
+            pickle.dump(draw_tasks,open(figroot+'/data.pkl','wb'))
+            
 
             plt.figure(figsize=(4, 4))
             ax = plt.subplot(111)
@@ -104,8 +115,8 @@ class DGSFC:
             
             plt.figure(figsize=(4, 4))
             for i in range(NC):
-                points=manifolds[i].points
-                centers=manifolds[i].center
+                points= X_extend[ manifolds[i].pID,:-2 ]
+                centers=np.mean(points,axis=0)
                 plt.scatter(points[:,0],points[:,1],c=color_list[i])
                 plt.text(centers[0],centers[1],str(i))
             plt.axis('equal')
@@ -113,9 +124,9 @@ class DGSFC:
                 plt.savefig(figroot+'/{}.png'.format(10000000+idx))
             plt.close()
 
-            plot_tools.PaperGraph.show_graph(ConnectMat,manifolds,fileroot=figroot+'/{}.png',fileidx=20000000)
-            plot_tools.PaperGraph.show_graph(W,manifolds,fileroot=figroot+'/{}.png',fileidx=30000000)
-            plot_tools.PaperGraph.show_point_with_clusters(Sets,manifolds,fileroot=figroot+'/{}.png',fileidx=40000000,title='k:{} search_n:{} ratio:{}'.format(k,search_n,ratio))
+            plot_tools.PaperGraph.show_topo_graph(ConnectMat,real_manifolds,X_extend,fileroot=figroot+'/{}.png',fileidx=20000000)
+            plot_tools.PaperGraph.show_topo_graph(W,real_manifolds,X_extend,fileroot=figroot+'/{}.png',fileidx=30000000)
+            plot_tools.PaperGraph.show_clusters(X_extend[:,:-2],Y,fileroot=figroot+'/{}.png',fileidx=40000000,title='k:{} K_n:{} level:{} ratio:{}'.format(K_d,K_n,level,ratio))
             ploter.SaveGIF(mp4name,fps=fps)
 
-        return Y,Sets,
+        return Y

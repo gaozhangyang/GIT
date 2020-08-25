@@ -55,7 +55,7 @@ def multi_class_permutation(Y_true, Y_pred):
     f1_best = 0
     Y_pred_best = Y_pred_
     for p in multiset_permutations(classes):
-        mapping_dict = {classes[i]:p[i] for i in range(class_num)}
+        mapping_dict = {p[i]:classes[i] for i in range(class_num)}
         def mapping(x):
             return mapping_dict[x]
         vec_mapping=np.vectorize(mapping)

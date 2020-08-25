@@ -29,6 +29,9 @@ class DGSFC:
                  mp4name='circles',
                  draw_seed=2020
                  ):
+        '''
+        
+        '''
                  
         extend=np.zeros((X.shape[0],2))
         extend[:,1]=range(0,X.shape[0])

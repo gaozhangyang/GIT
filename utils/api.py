@@ -30,7 +30,11 @@ class DGSFC:
                  draw_seed=2020
                  ):
         '''
-        
+        K_d: k neighbors to estimiate the local density
+        K_n: K neighbors in density growing process, for estimate the gradient flows
+        epsilon: the threshold for noise dropping
+        lambda: the threshold for topo-graph pruning
+
         '''
                  
         extend=np.zeros((X.shape[0],2))

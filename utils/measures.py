@@ -7,11 +7,13 @@ from sklearn.metrics import f1_score, adjusted_rand_score, accuracy_score
 from sympy.utilities.iterables import multiset_permutations
 import pandas as pd
 def measures_calculator(Y_true, Y_pred, multiclass=False):
+    '''
+    to calculation the measures for method evaluation;
+    if multiclass is Ture, it will automatically find the best permutation of class label of Y_pred according to f1 score. 
+    '''
     cover_rate = cover_calculator(Y_pred)
     Y_true = Y_true[Y_pred!=-1]
     Y_pred = Y_pred[Y_pred!=-1]
-    
-
     df_mesures = pd.DataFrame(columns=['f1', 'ARI', 'ACC', 'cover_rate'])
     if multiclass == True:
         _, Y_pred = multi_class_permutation(Y_true, Y_pred)
@@ -26,7 +28,7 @@ def measures_calculator(Y_true, Y_pred, multiclass=False):
 def cover_calculator(Y_pred):
     sample_num = Y_pred.shape[0]
     noise_num = Y_pred[Y_pred==-1].shape[0]
-    return noise_num/sample_num
+    return 1-noise_num/sample_num
 
 
 def f1_score_calculator(Y_true, Y_pred):
@@ -71,4 +73,5 @@ if __name__ == '__main__':
     Y_true = np.array([1,2,3,1,2,3,1,2,3])
     Y_pred = np.array([-1,2,3,1,3,2,1,1,1])
 
-    print(measures_calculator(Y_true, Y_pred))
+    print(measures_calculator(Y_true, Y_pred, multiclass=True))
+

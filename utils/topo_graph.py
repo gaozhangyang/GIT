@@ -8,13 +8,16 @@ class TopoGraph:
     #######################connectivity of local clusters################
     @classmethod
     def get_boundary(self,connection,manifolds):
-        connection=np.array(connection)
         BoundaryMat_E=np.zeros((len(manifolds),len(manifolds)),dtype=set)
+        connection=np.array(connection)
         for i in range(len(manifolds)):
             for j in range(i+1,len(manifolds)):
-                maski2j = (connection[:,2]==manifolds[i].rt) & (connection[:,3]==manifolds[j].rt)
-                maskj2i = (connection[:,2]==manifolds[j].rt) & (connection[:,3]==manifolds[i].rt)
-                BoundaryMat_E[i,j] = BoundaryMat_E[j,i] =connection[maski2j|maskj2i,:2]
+                if len(connection)==0:
+                    BoundaryMat_E[i,j]=np.array([])
+                else:
+                    maski2j = (connection[:,2]==manifolds[i].rt) & (connection[:,3]==manifolds[j].rt)
+                    maskj2i = (connection[:,2]==manifolds[j].rt) & (connection[:,3]==manifolds[i].rt)
+                    BoundaryMat_E[i,j] = BoundaryMat_E[j,i] =connection[maski2j|maskj2i,:2]
         return BoundaryMat_E
     
     @classmethod

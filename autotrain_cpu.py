@@ -24,9 +24,6 @@ import hdbscan
 from sklearn.cluster import DBSCAN
 
 
-save_name='mnist20'
-pnum=50
-
 from torchvision import datasets
 
 class DataLoader:
@@ -100,7 +97,7 @@ def run(kd, ks, alpha,pid,process_state,idx,results):
    
 
     results[idx]=[kd, ks, alpha ,F,ARI]
-    string='{}\t{}\t{:.4f}\t{:.4f}\t{:.4f}'.format(kd, ks, alpha,F,ARI)
+    string='{:d}\t{:d}\t{:.4f}\t{:.4f}\t{:.4f}'.format(kd, ks, alpha,F,ARI)
     print(string)
     logging.info(string)
     process_state[str(pid)]=True
@@ -117,6 +114,9 @@ def term(sig_num, addtion):
         print(str(e))
 
 if __name__ =='__main__':
+    save_name='mnist_10' # dataname
+    pnum=50 # 并行线程数
+
     process_state=Manager().dict({str(i):True for i in range(pnum)})
     processes=[Process() for i in range(pnum)]
     for p in processes:
@@ -125,13 +125,10 @@ if __name__ =='__main__':
     signal.signal(signal.SIGTERM, term)
 
     results=Manager().dict()
-    X,Y_true=DataLoader.load('mnist_20')
+    X,Y_true=DataLoader.load(save_name)
     V = len(X)
     Vmin = int(0.2*np.sqrt(V))
     Vmax = int(np.sqrt(V))
-    # Vmin = int(0.5*np.sqrt(V))
-    # K,alpha=np.meshgrid(np.arange(Vmin,Vmax,5),np.arange(0,0.5,0.01))
-    # K,alpha=K.reshape(-1),alpha.reshape(-1)
 
     logging.basicConfig(level=logging.INFO,#控制台打印的日志级别
                     filename='./{}.log'.format(save_name),#'log/{}_{}_{}.log'.format(args.gcn_type,args.graph_type,args.order_list)

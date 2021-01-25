@@ -6,7 +6,7 @@ class LCluster:
         pass
 
     @classmethod
-    def detect_descending_manifolds(self,X,K_d,K_s,epsilon,scale):
+    def detect_descending_manifolds(self,X,K_d,K_s,scale):
         extend=np.arange(0,X.shape[0]).reshape(-1,1).repeat(4,axis=1) # extend 4 dim, representing $density $ID $local clusters $ label
         X_extend=np.hstack([X,extend])
 
@@ -39,13 +39,17 @@ class LCluster:
 
             if j is not None: # The father node was found
                 X_extend[i,-2]=X_extend[j,-2]
-                if X_extend[i,-2]!=-1:
-                    if X_extend[i,-4]<epsilon*X_extend[int(X_extend[i,-2]),-4]:
-                        X_extend[i,-2]=-1
-                    else:
-                        for s in J[1:]:
-                            if X_extend[s,-2]!=X_extend[i,-2]:
-                                Boundary.append((i,s,int(X_extend[i,-2]),int(X_extend[s,-2])))
+                for s in J[1:]:
+                    if X_extend[s,-2]!=X_extend[i,-2]:
+                        Boundary.append((i,s,int(X_extend[i,-2]),int(X_extend[s,-2])))
+
+                # if X_extend[i,-2]!=-1:
+                #     if X_extend[i,-4]<epsilon*X_extend[int(X_extend[i,-2]),-4]:
+                #         X_extend[i,-2]=-1
+                #     else:
+                #         for s in J[1:]:
+                #             if X_extend[s,-2]!=X_extend[i,-2]:
+                #                 Boundary.append((i,s,int(X_extend[i,-2]),int(X_extend[s,-2])))
             
             if index%draw_step==0:
                 draw_tasks.append( (X[:,:2],X[:,-2],Back_mask.copy(),index) )

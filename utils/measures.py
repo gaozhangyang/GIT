@@ -89,6 +89,8 @@ def measures_calculator(Y_true, Y_pred):
     if multiclass is Ture, it will automatically find the best permutation of class label of Y_pred according to f1 score. 
     '''
     N_cls=len(set(Y_pred))
+    if -1 in Y_pred:
+        N_cls-=1
     Y_pred,Y_true=matchY(Y_pred,Y_true)
     cover_rate = cover_calculator(Y_pred)
     Y_true = Y_true[Y_pred!=-1]

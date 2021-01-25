@@ -4,7 +4,7 @@ class TopoGraph:
     def __init__(self):
         pass
 
-    def topograph_construction_pruning(self,X_extend,Boundary,Dis,alpha):
+    def topograph_construction_pruning(self,V,X_extend,Boundary,Dis,alpha):
         E,E_hat,gamma={},{},{}
         X_mid=[]
         for (i,j,ri,rj) in Boundary:
@@ -26,7 +26,7 @@ class TopoGraph:
                 P1,P2=X_extend[ri,-4],X_extend[rj,-4]
                 gamma[(ri,rj)]=gamma[(rj,ri)]=min(P1/P2,P2/P1)**2
             
-            s=gamma[(ri,rj)]*(P_mid[idx])**2
+            s= (gamma[(ri,rj)]*(P_mid[idx])**2) / (len(V[ri])*len(V[rj]))
             E[(ri,rj)]+=s
             E[(rj,ri)]=E[(ri,rj)]
         
@@ -40,6 +40,15 @@ class TopoGraph:
         for key,value in E.items():
             i,j=key[0],key[1]
             if value<=alpha*E_hat[i] or value<=alpha*E_hat[j]:
+                E[(i,j)]=0
+                E[(j,i)]=0
+
+        weights = sorted([one for one in E.values() if one>0])
+        threshold = weights[int(len(weights)*alpha)]
+
+        for key,value in E.items():
+            i,j=key[0],key[1]
+            if value<=threshold:
                 E[(i,j)]=0
                 E[(j,i)]=0
         return E_raw,E

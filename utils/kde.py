@@ -20,7 +20,8 @@ class KDE_DIS():
 
         for i in range(X_.shape[1]):
             sigma=np.sqrt(np.var(X_[:,i]))
-            scale=(4*sigma**5/(3*X_[:,i].shape[0]))**0.2
+            # scale=(4*sigma**5/(3*X_[:,i].shape[0]))**0.2
+            scale=sigma
             Sigma_.append(sigma)
             Scale_.append(scale)
         return Scale_

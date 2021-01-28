@@ -27,9 +27,14 @@ class LCluster:
             index+=1
             Back_mask[i]=0
 
-            idx_iN=I[i,1:K_s+1] # the index value nearest k neighbors
-            mask = P[idx_iN]>P[i]
-            J=idx_iN[mask] # the density of the selected neighboring points is greater than the current point
+            try:
+                idx_iN=I[i,1:K_s+1] # the index value nearest k neighbors
+                mask = P[idx_iN]>P[i]
+                J=idx_iN[mask] # the density of the selected neighboring points is greater than the current point
+            except:
+                idx_iN=I[i,1:K_s+1] # the index value nearest k neighbors
+                mask = P[idx_iN]>P[i]
+                J=idx_iN[mask] # the density of the selected neighboring points is greater than the current point
 
             if J.shape[0]>0:
                 grad=(P[J]-P[i])/(D[i,1:K_s+1][mask])

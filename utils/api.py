@@ -2,7 +2,7 @@ from random import seed
 from networkx.readwrite.json_graph import tree
 import numpy as np,random
 import networkx as nx
-import sys;sys.path.append('/usr/data/gzy/code_data/utils')
+import sys;sys.path.append('/home/DGC/utils')
 from detect_local_mode import LCluster
 from topo_graph import TopoGraph
 import plot_tools
@@ -70,6 +70,8 @@ class DGSFC:
             if Dim<=6:
                 # show raw data
                 plot_tools.autoPlot(X,np.zeros(X_extend.shape[0]).astype(np.int))
+                # show density
+                plot_tools.autoPlot(X,np.zeros(X_extend.shape[0]).astype(np.int), area=X_extend[:, -4])
                 # show local modes
                 plot_tools.PaperGraph.show_local_clusters(X,V,seed=draw_seed)
                 # show topo-graph
@@ -146,9 +148,22 @@ if __name__ =='__main__':
                 Y_true = np.array([Y_map[y] for y in Y_true])
                 return X,Y_true
 
+            if name=='seismic':
+                df = pd.read_csv('/home/DGC/ex2_realdata/real_data/seismic-bumps.txt',sep = ',',header=None)
+                for col in [0,1,2,7]:
+                    sym=list(set(df.iloc[:,col]))
+                    for i in range(len(sym)):
+                        df.iloc[df.iloc[:,col]==sym[i],col]=i
+                X=df.iloc[:,:-1].values.astype(np.float)
+                Y_true=df.iloc[:,-1].values.astype(np.int)
+                Y_set=list(set(Y_true))
+                Y_map={Y_set[i]:i for i in range(len(Y_set))}
+                Y_true=np.array([Y_map[y] for y in Y_true])
+                return X,Y_true
 
 
-    X,Y_true=DataLoader.load('glass')
+
+    X,Y_true=DataLoader.load('seismic')
     K=int(0.6*np.sqrt(X.shape[0]))
 
     Y_pred=api.DGSFC.fit(  X,

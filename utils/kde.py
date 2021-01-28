@@ -1,15 +1,16 @@
 import scipy
 import numpy as np
 from scipy.spatial import cKDTree
-
 norm_minmax=lambda x:(x-np.min(x))/(np.max(x)-np.min(x))
 
 class KDE_DIS():
     def __init__(self,dataset,param,scale):
         self.dataset=dataset
-        self.A=1/ np.array(self.get_scales(self.dataset))
-        self.param=param+1
-        dataset_=np.matmul(self.dataset,np.diag(self.A))
+        scales = self.get_scales(self.dataset)
+        self.index = np.where(np.array(scales) != 0.0)[0]
+        self.A=1 / (np.array(scales)[self.index])
+        self.param = (param+1).item() if isinstance(param, np.int64) else param+1
+        dataset_=np.matmul(self.dataset[:, self.index],np.diag(self.A))
         self.kdtree=cKDTree(dataset_)
         self.scale=scale
     
@@ -27,7 +28,7 @@ class KDE_DIS():
         return Scale_
     
     def get_DI(self,X):
-        X_=np.matmul(X,np.diag(self.A))
+        X_=np.matmul(X[:, self.index],np.diag(self.A))
         self.D, self.I = self.kdtree.query(X_, k=self.param)
         return self.D,self.I
 
@@ -47,8 +48,8 @@ class KDE_DIS():
         else:
             EXP=np.exp(-D**2)
         P=np.mean(EXP,axis=1)
-        if train:
-            self.maxP=np.max(P)
-            self.minP=np.min(P)
-        P=(P-self.minP)/(self.maxP-self.minP+1e-10)
+        # if train:
+        #     self.maxP=np.max(P)
+        #     self.minP=np.min(P)
+        # P=(P-self.minP)/(self.maxP-self.minP+1e-10)
         return P,D,I

@@ -10,7 +10,7 @@ from multiprocessing import Pool,Manager,Process
 import numpy as np
 
 
-def autoPlot(data,y=None,continues=False,seed=2020):
+def autoPlot(data,y=None,continues=False,seed=2020,area=None):
     plt.figure(figsize=(4, 4))
     if type(y)==np.ndarray:
         y=y.reshape(-1)
@@ -46,8 +46,12 @@ def autoPlot(data,y=None,continues=False,seed=2020):
 
         if data.shape[1]==2:
             ax = plt.subplot(111)
-            ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1],c=hashColor(y[~noise_mask]))
-            ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1],c=hashColor(y[noise_mask]),alpha=0.1)
+            if area is None:
+                ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1],c=hashColor(y[~noise_mask]))
+                ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1],c=hashColor(y[noise_mask]),alpha=0.1)
+            else:
+                ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1],c=hashColor(y[~noise_mask]), s=25 * area[~noise_mask].astype(np.float64) ** 3, alpha=0.5)
+                ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1],c=hashColor(y[noise_mask]), s=area[noise_mask].astype(np.float64), alpha=0.1)
 
         if data.shape[1]==3:
             ax = plt.subplot(111, projection='3d')

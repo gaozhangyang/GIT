@@ -88,7 +88,7 @@ class DGSFC:
             else:
                 # show pruned topo-graph
                 plot_tools.PaperGraph.show_topo_graph(V,E)
-        return Y,t1,t2,t3,t4,t5
+        return Y
 
 
 if __name__ =='__main__':

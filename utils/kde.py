@@ -47,8 +47,8 @@ class KDE_DIS():
         else:
             EXP=np.exp(-D**2)
         P=np.mean(EXP,axis=1)
-        if train:
-            self.maxP=np.max(P)
-            self.minP=np.min(P)
-        P=(P-self.minP)/(self.maxP-self.minP+1e-10)
+        # if train:
+        #     self.maxP=np.max(P)
+        #     self.minP=np.min(P)
+        # P=(P-self.minP)/(self.maxP-self.minP+1e-10)
         return P,D,I

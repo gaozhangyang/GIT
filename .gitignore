@@ -121,3 +121,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 results/
+
+# other
+autotrain*
+*.log
+quickshift
+results*
+test.py

@@ -125,3 +125,9 @@ results/
 *.gz
 *-ubyte
 *.pt
+# other
+autotrain*
+*.log
+quickshift
+results*
+test.py

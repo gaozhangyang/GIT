@@ -11,6 +11,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import savefig
 import pickle
+import time
 
 class DGSFC:
     def __init__(self) -> None:
@@ -32,11 +33,14 @@ class DGSFC:
         epsilon: the threshold for noise dropping
         alpha: the threshold for topo-graph pruning
         '''
+        t1=time.time()
         LC=LCluster()
-        V,Boundary,X_extend,Dis,draw_tasks=LC.detect_descending_manifolds(X,K_d,K_s,scale)
+        V,Boundary,X_extend,Dis,draw_tasks,t2=LC.detect_descending_manifolds(X,K_d,K_s,scale)
+        t3=time.time()
 
         TG=TopoGraph()
-        E_raw,E=TG.topograph_construction_pruning(V,X_extend,Boundary,Dis,alpha)
+        E_raw,E=TG.topograph_construction_pruning(V,X_extend,Boundary,Dis,alpha,epsilon)
+        t4=time.time()
 
         G = nx.Graph()
         G.add_nodes_from(V.keys())
@@ -62,6 +66,7 @@ class DGSFC:
             if len(component)<epsilon:
                 X_extend[component,-1]=-1
         Y=X_extend[:,-1].astype(np.int)
+        t5=time.time()
 
 
         ########################plot######################
@@ -83,7 +88,7 @@ class DGSFC:
             else:
                 # show pruned topo-graph
                 plot_tools.PaperGraph.show_topo_graph(V,E)
-        return Y
+        return Y,t1,t2,t3,t4,t5
 
 
 if __name__ =='__main__':
@@ -95,57 +100,94 @@ if __name__ =='__main__':
     import networkx as nx
 
 
+    # class DataLoader:
+    #     def __init__(self):
+    #         pass
+        
+    #     @classmethod
+    #     def load(self,name):
+    #         if name== 'iris':
+    #             df=pd.read_csv('./real_data/iris.csv', header=None)
+    #             X=df.iloc[1:,:-1].values.astype(np.float)
+    #             Y_true=df.iloc[1:,-1].values.astype(np.float)
+    #             return X,Y_true
+            
+    #         if name=='wine':
+    #             df = pd.read_csv('./real_data/wine.csv', header=None)
+    #             X = df.iloc[1:,:-1].values.astype(np.float)
+    #             Y_true = df.iloc[1:,-1].values.astype(np.int)
+    #             Y_set = list(set(Y_true))
+    #             Y_map = {Y_set[i]:i for i in range(len(Y_set))}
+    #             Y_true = np.array([Y_map[y] for y in Y_true])
+    #             return X,Y_true
+            
+    #         if name=='glass':
+    #             df = pd.read_csv('/usr/data/gzy/rebuttal_DGC/DGC_gzy/DGC/ex3_realdata/real_data/glass.csv', header=0)
+    #             X = df.iloc[:,:-1].values.astype(np.float)
+    #             Y_true = df.iloc[:,-1].values.astype(np.int)
+    #             Y_set = list(set(Y_true))
+    #             Y_map = {Y_set[i]:i for i in range(len(Y_set))}
+    #             Y_true = np.array([Y_map[y] for y in Y_true])
+    #             return X,Y_true
+            
+    #         if name=='breast cancer':
+    #             df = pd.read_csv('./real_data/wdbc.data', header=None)
+    #             X = df.iloc[:,2:].values.astype(np.float)
+    #             Y_true = df.iloc[:,1]
+
+    #             Y_set = list(set(Y_true))
+    #             Y_map = {Y_set[i]:i for i in range(len(Y_set))}
+    #             Y_true = np.array([Y_map[y] for y in Y_true])
+    #             return X,Y_true
+            
+    #         if name=='hepatitis':
+    #             df = pd.read_csv('./real_data/hepatitis.data', header=None)
+    #             df.replace('?',np.nan,inplace=True)
+    #             df = df.apply(pd.to_numeric, errors='coerce')
+    #             df = df.fillna(df.mean())
+
+    #             X = df.iloc[1:,1:].values.astype(np.float)
+    #             Y_true = df.iloc[1:,0].values.astype(np.int)
+    #             Y_set = list(set(Y_true))
+    #             Y_map = {Y_set[i]:i for i in range(len(Y_set))}
+    #             Y_true = np.array([Y_map[y] for y in Y_true])
+    #             return X,Y_true
+
+
     class DataLoader:
         def __init__(self):
             pass
         
         @classmethod
         def load(self,name):
-            if name== 'iris':
-                df=pd.read_csv('./real_data/iris.csv', header=None)
-                X=df.iloc[1:,:-1].values.astype(np.float)
-                Y_true=df.iloc[1:,-1].values.astype(np.float)
+            if name== 'circles':
+                df=pd.read_csv('/usr/data/gzy/code_data/ex1_toy/artificial_csv/circles_0.1_noise.csv', header=None)
+                X=df.values[:,:2]
+                Y_true = df.iloc[:,-1]
                 return X,Y_true
             
-            if name=='wine':
-                df = pd.read_csv('./real_data/wine.csv', header=None)
-                X = df.iloc[1:,:-1].values.astype(np.float)
-                Y_true = df.iloc[1:,-1].values.astype(np.int)
-                Y_set = list(set(Y_true))
-                Y_map = {Y_set[i]:i for i in range(len(Y_set))}
-                Y_true = np.array([Y_map[y] for y in Y_true])
+            if name=='moons':
+                df=pd.read_csv('/usr/data/gzy/code_data/ex1_toy/artificial_csv/moons_0.15_noise.csv', header=None)
+                X=df.values[:,:2]
+                Y_true = df.iloc[:,-1]
                 return X,Y_true
             
-            if name=='glass':
-                df = pd.read_csv('/usr/data/gzy/rebuttal_DGC/DGC_gzy/DGC/ex3_realdata/real_data/glass.csv', header=0)
-                X = df.iloc[:,:-1].values.astype(np.float)
-                Y_true = df.iloc[:,-1].values.astype(np.int)
-                Y_set = list(set(Y_true))
-                Y_map = {Y_set[i]:i for i in range(len(Y_set))}
-                Y_true = np.array([Y_map[y] for y in Y_true])
+            if name=='impossible':
+                df=pd.read_csv('/usr/data/gzy/code_data/ex1_toy/artificial_csv/impossible_plus.csv', header=None)
+                X=df.values[:,:2]
+                Y_true = df.iloc[:,-1]
                 return X,Y_true
             
-            if name=='breast cancer':
-                df = pd.read_csv('./real_data/wdbc.data', header=None)
-                X = df.iloc[:,2:].values.astype(np.float)
-                Y_true = df.iloc[:,1]
-
-                Y_set = list(set(Y_true))
-                Y_map = {Y_set[i]:i for i in range(len(Y_set))}
-                Y_true = np.array([Y_map[y] for y in Y_true])
+            if name=='s-set':
+                df=pd.read_csv('/usr/data/gzy/code_data/ex1_toy/artificial_csv/s-set1.csv', header=None)
+                X=df.values[:,:2]
+                Y_true = df.iloc[:,-1]
                 return X,Y_true
             
-            if name=='hepatitis':
-                df = pd.read_csv('./real_data/hepatitis.data', header=None)
-                df.replace('?',np.nan,inplace=True)
-                df = df.apply(pd.to_numeric, errors='coerce')
-                df = df.fillna(df.mean())
-
-                X = df.iloc[1:,1:].values.astype(np.float)
-                Y_true = df.iloc[1:,0].values.astype(np.int)
-                Y_set = list(set(Y_true))
-                Y_map = {Y_set[i]:i for i in range(len(Y_set))}
-                Y_true = np.array([Y_map[y] for y in Y_true])
+            if name=='smile':
+                df=pd.read_csv('/usr/data/gzy/code_data/ex1_toy/artificial_csv/smile1.csv', header=None)
+                X=df.values[:,:2]
+                Y_true = df.iloc[:,-1]
                 return X,Y_true
 
             if name=='seismic':

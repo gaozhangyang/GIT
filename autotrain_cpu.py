@@ -114,7 +114,7 @@ def term(sig_num, addtion):
         print(str(e))
 
 if __name__ =='__main__':
-    save_name='mnist_10' # dataname
+    save_name='fmnist_5' # dataname
     pnum=50 # 并行线程数
 
     process_state=Manager().dict({str(i):True for i in range(pnum)})

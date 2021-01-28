@@ -1,5 +1,6 @@
 import numpy as np
 from kde import KDE_DIS
+import time
         
 class LCluster:
     def __init__(self):
@@ -12,6 +13,7 @@ class LCluster:
 
         Dis=KDE_DIS(X_extend[:,:-4],param=K_d,scale=scale)
         P,D,I =Dis.get_density(X_extend[:,:-4],train=True) # get the density of points
+        t2=time.time()
         X_extend[:,-4]=P
 
         idx=np.argsort(P).tolist()
@@ -66,4 +68,4 @@ class LCluster:
         for i in range(len(R)):
             V[R[i]].append(i)
         
-        return V,Boundary,X_extend,Dis,draw_tasks
+        return V,Boundary,X_extend,Dis,draw_tasks,t2

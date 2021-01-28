@@ -121,3 +121,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 results/
+*.csv
+*.gz
+*-ubyte
+*.pt

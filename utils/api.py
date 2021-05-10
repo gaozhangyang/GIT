@@ -88,7 +88,7 @@ class DGSFC:
             else:
                 # show pruned topo-graph
                 plot_tools.PaperGraph.show_topo_graph(V,E)
-        return Y
+        return Y#,t1,t2,t3,t4,t5
 
 
 if __name__ =='__main__':
@@ -205,7 +205,7 @@ if __name__ =='__main__':
 
 
 
-    X,Y_true=DataLoader.load('seismic')
+    X,Y_true=DataLoader.load('circles')
     K=int(0.6*np.sqrt(X.shape[0]))
 
     Y_pred=api.DGSFC.fit(  X,
@@ -216,4 +216,4 @@ if __name__ =='__main__':
                     # density_type='NKD',
                     plot=False,
                     )
-    plot_tools.autoPlot(X,Y_pred)
+    # plot_tools.autoPlot(X,Y_pred)

@@ -14,13 +14,18 @@ class TopoGraph:
             E_hat[rj]=0
             gamma[(ri,rj)]=None
             count[(ri,rj)]=0
-            X_mid.append( (X_extend[i,:-4]+X_extend[j,:-4])/2 )
+            X_mid.append( (X_extend[i,-3],X_extend[j,-3]) )
 
         if len(X_mid)==0:
             return E.copy(),E
 
-        X_mid=np.array(X_mid)
-        P_mid,D,I=Dis.get_density(X_mid)
+        X_mid=np.array(X_mid).astype(np.int)
+        # P_left=Dis.get_density(X_mid[:,0])
+        # P_right=Dis.get_density(X_mid[:,1])
+        # P_mid = (P_left+P_right)/2
+
+        # P_mid = np.exp(-(np.linalg.norm(X_extend[X_mid[:,0],:-4]-X_extend[X_mid[:,1],:-4],axis=1)/2/np.sqrt(X_extend.shape[1]-4))**2)
+        P_mid = Dis.get_midP(X_mid[:,0],X_mid[:,1])
 
 
         for idx,(i,j,ri,rj) in enumerate(Boundary):

@@ -3,7 +3,7 @@ measures for results
 '''
 
 import numpy as np
-from sklearn.metrics import f1_score, adjusted_rand_score, accuracy_score
+from sklearn.metrics import f1_score, adjusted_rand_score, accuracy_score, normalized_mutual_info_score
 from sympy.utilities.iterables import multiset_permutations
 import pandas as pd
 import sys
@@ -95,14 +95,15 @@ def measures_calculator(Y_true, Y_pred):
     cover_rate = cover_calculator(Y_pred)
     Y_true = Y_true[Y_pred!=-1]
     Y_pred = Y_pred[Y_pred!=-1]
-    df_mesures = pd.DataFrame(columns=['f1', 'ARI', 'ACC', 'cover_rate', 'classes'])
+    df_mesures = pd.DataFrame(columns=['f1', 'ARI', 'ACC','NMI', 'cover_rate', 'classes'])
     # df_mesures = pd.DataFrame(columns=['f1', 'ARI', 'ACC', 'cover_rate'])
 
     f1 = f1_score_calculator(Y_true, Y_pred)
     ARI = ARI_calculator(Y_true, Y_pred)
     ACC = ACC_calculator(Y_true, Y_pred)
+    NMI = normalized_mutual_info_score(Y_true,Y_pred)
 
-    df_mesures.loc[0] = [f1, ARI, ACC, cover_rate,N_cls]
+    df_mesures.loc[0] = [f1, ARI, ACC, NMI, cover_rate,N_cls]
     # df_mesures.loc[0] = [f1, ARI, ACC, cover_rate]
     return df_mesures
 

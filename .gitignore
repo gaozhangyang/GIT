@@ -121,7 +121,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 results/
-*.csv
 *.gz
 *-ubyte
 *.pt
@@ -131,3 +130,7 @@ autotrain*
 quickshift
 results*
 test.py
+
+*.npy
+*.jpg
+*.pdf

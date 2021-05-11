@@ -27,13 +27,20 @@ class TopoGraph:
         # P_mid = np.exp(-(np.linalg.norm(X_extend[X_mid[:,0],:-4]-X_extend[X_mid[:,1],:-4],axis=1)/2/np.sqrt(X_extend.shape[1]-4))**2)
         P_mid = Dis.get_midP(X_mid[:,0],X_mid[:,1])
 
-
+        Used_Bound_P=[]
         for idx,(i,j,ri,rj) in enumerate(Boundary):
+            if i in Used_Bound_P:
+                continue
+            if j in Used_Bound_P:
+                continue
+            Used_Bound_P.append(i)
+            Used_Bound_P.append(j)
+
             if gamma[(ri,rj)] is None:
                 P1,P2=X_extend[ri,-4],X_extend[rj,-4]
                 gamma[(ri,rj)]=gamma[(rj,ri)]=min(P1/P2,P2/P1)**2#/max(P2,P1)**2
             
-            s= (gamma[(ri,rj)]*(P_mid[idx])**2) / (len(V[ri])*len(V[rj]))
+            s= (gamma[(ri,rj)]*(P_mid[idx])**2) #/ (len(V[ri])*len(V[rj]))
             count[(ri,rj)]+=1
             count[(rj,ri)]=count[(ri,rj)]
             E[(ri,rj)]+=s

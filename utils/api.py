@@ -21,9 +21,10 @@ class DGSFC:
     def fit(self,X,
                  K_d,
                  K_s,
+                 alpha=0.2,
                  epsilon=100,
-                 alpha=0,
-                 plot=False,
+                 Cluster=2,
+                 plot=True,
                  scale=False,
                  draw_seed=2020
                  ):
@@ -38,35 +39,54 @@ class DGSFC:
         V,Boundary,X_extend,Dis,draw_tasks,t2=LC.detect_descending_manifolds(X,K_d,K_s,scale)
         t3=time.time()
 
-        TG=TopoGraph()
-        E_raw,E=TG.topograph_construction_pruning(V,X_extend,Boundary,Dis,alpha,epsilon)
+        TG=TopoGraph(Cluster,V,alpha)
+        Y,E=TG.topograph_construction_pruning(V,X_extend,Boundary,Dis)
         t4=time.time()
 
-        G = nx.Graph()
-        G.add_nodes_from(V.keys())
-        for e in E:
-            if E[e]>0:
-                G.add_edge(e[0],e[1],weight=E[e])
-        Sets=list(nx.connected_components(G))
-        if -1 in G.nodes():
-            G.remove_node(-1)
+        ########################plot######################
+        if plot:
+            Dim=X_extend.shape[1]
+            if Dim<=6:
+                E_new={}
+                for (i,j),v in E.items():
+                    E_new[(TG.idx_graph2point[i],TG.idx_graph2point[j])]=v
+                # show raw data
+                plot_tools.autoPlot(X,np.zeros(X_extend.shape[0]).astype(np.int))
+                # show density
+                plot_tools.autoPlot(X,np.zeros(X_extend.shape[0]).astype(np.int), area=X_extend[:, -4])
+                # show local modes
+                plot_tools.PaperGraph.show_local_clusters(X,V,seed=draw_seed)
+                # show pruned topo-graph
+                plot_tools.PaperGraph.show_topo_graph(V,E_new,X)
+                # show clustering results
+                plot_tools.autoPlot(X,Y)
 
-        M2C={}
-        for c in range(len(Sets)):
-            for m in list(Sets[c]):
-                M2C.update({m:c})
+        return Y
+        # G = nx.Graph()
+        # G.add_nodes_from(V.keys())
+        # for e in E:
+        #     if E[e]>0:
+        #         G.add_edge(e[0],e[1],weight=E[e])
+        # Sets=list(nx.connected_components(G))
+        # if -1 in G.nodes():
+        #     G.remove_node(-1)
 
-        for m,points in V.items():
-            X_extend[points,-1]=M2C[m]
+        # M2C={}
+        # for c in range(len(Sets)):
+        #     for m in list(Sets[c]):
+        #         M2C.update({m:c})
+
+        # for m,points in V.items():
+        #     X_extend[points,-1]=M2C[m]
         
-        # if -1 in V.keys():
-        #     X_extend[V[-1],-1]=-1
+        # # if -1 in V.keys():
+        # #     X_extend[V[-1],-1]=-1
+        # # Y=X_extend[:,-1].astype(np.int)
+        # for i,component in V.items():
+        #     if len(component)<epsilon:
+        #         X_extend[component,-1]=-1
         # Y=X_extend[:,-1].astype(np.int)
-        for i,component in V.items():
-            if len(component)<epsilon:
-                X_extend[component,-1]=-1
-        Y=X_extend[:,-1].astype(np.int)
-        t5=time.time()
+        # t5=time.time()
 
 
         ########################plot######################
@@ -211,9 +231,9 @@ if __name__ =='__main__':
     Y_pred=api.DGSFC.fit(  X,
                     K_d=K,
                     K_s=K,
-                    alpha=0.4,
+                    Cluster=2,
                     epsilon=100,
                     # density_type='NKD',
-                    plot=False,
+                    plot=True,
                     )
     # plot_tools.autoPlot(X,Y_pred)

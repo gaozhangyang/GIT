@@ -123,7 +123,7 @@ class TopoGraph:
             
             # s= (gamma[(ri,rj)]*(P_mid[idx])**2) #/ (len(V[ri0])*len(V[rj0]))
             P1,P2=X_extend[ri0,-4],X_extend[rj0,-4]
-            s = ((P1+P2)/2)**2*gamma[(ri,rj)]#/ (len(V[ri0])*len(V[rj0]))
+            s = ((P1+P2)/2)*gamma[(ri,rj)]#/ (len(V[ri0])*len(V[rj0]))
             count[(ri,rj)]+=1
             count[(rj,ri)]=count[(ri,rj)]
 
@@ -144,14 +144,14 @@ class TopoGraph:
                 E[(i,j)]=0
                 E[(j,i)]=0
         
-        weights = sorted([one for one in E.values() if one>0])
-        threshold = weights[int(len(weights)*alpha)]
+        # weights = sorted([one for one in E.values() if one>0])
+        # threshold = weights[int(len(weights)*alpha)]
 
-        for key,value in E.items():
-            i,j=key[0],key[1]
-            if value<=threshold:
-                E[(i,j)]=0
-                E[(j,i)]=0
+        # for key,value in E.items():
+        #     i,j=key[0],key[1]
+        #     if value<=threshold:
+        #         E[(i,j)]=0
+        #         E[(j,i)]=0
 
 
         G = np.zeros((len(V),len(V)))

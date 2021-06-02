@@ -13,18 +13,17 @@ from matplotlib.pyplot import savefig
 import pickle
 import time
 
-class DGSFC:
+
+
+class GIT:
     def __init__(self) -> None:
         pass
 
     @classmethod
     def fit(self,X,
-                 K_d,
-                 K_s,
-                 epsilon=100,
-                 alpha=0,
+                 k,
+                 target_ratio=[1,1],
                  plot=False,
-                 scale=False,
                  draw_seed=2020
                  ):
         '''
@@ -35,39 +34,21 @@ class DGSFC:
         '''
         t1=time.time()
         LC=LCluster()
-        V,Boundary,X_extend,Dis,draw_tasks,t2=LC.detect_descending_manifolds(X,K_d,K_s,scale)
+        V,Boundary,X_extend,Dis,draw_tasks,t2=LC.detect_descending_manifolds(X,k,k)
         t3=time.time()
 
         TG=TopoGraph()
-        E_raw,E=TG.topograph_construction_pruning(V,X_extend,Boundary,Dis,alpha,epsilon)
+        E_raw,E_final,final_cluster=TG.topograph_construction_pruning(V,X_extend,Boundary,Dis,target_ratio)
         t4=time.time()
 
-        G = nx.Graph()
-        G.add_nodes_from(V.keys())
-        for e in E:
-            if E[e]>0:
-                G.add_edge(e[0],e[1],weight=E[e])
-        Sets=list(nx.connected_components(G))
-        if -1 in G.nodes():
-            G.remove_node(-1)
+        # node2cls: index of local cluster --> index of classes
+        # c2ordered: index of classes --> index of ordered classes, Y=0,1,2,...
+        # c2ordered = { c:i for i,c in enumerate(set(node2cls.values()))}
+        for c,cluster_index in final_cluster.items():
+            for cluster in cluster_index:
+                X_extend[V[cluster],-1]=c
 
-        M2C={}
-        for c in range(len(Sets)):
-            for m in list(Sets[c]):
-                M2C.update({m:c})
-
-        for m,points in V.items():
-            X_extend[points,-1]=M2C[m]
-        
-        # if -1 in V.keys():
-        #     X_extend[V[-1],-1]=-1
-        # Y=X_extend[:,-1].astype(np.int)
-        for i,component in V.items():
-            if len(component)<epsilon:
-                X_extend[component,-1]=-1
-        Y=X_extend[:,-1].astype(np.int)
-        t5=time.time()
-
+        Y = X_extend[:,-1].astype(np.int)
 
         ########################plot######################
         if plot:
@@ -76,19 +57,19 @@ class DGSFC:
                 # show raw data
                 plot_tools.autoPlot(X,np.zeros(X_extend.shape[0]).astype(np.int))
                 # show density
-                plot_tools.autoPlot(X,np.zeros(X_extend.shape[0]).astype(np.int), area=X_extend[:, -4])
+                plot_tools.autoPlot(X, y=X_extend[:, -4],continues=True)
                 # show local modes
                 plot_tools.PaperGraph.show_local_clusters(X,V,seed=draw_seed)
                 # show topo-graph
                 plot_tools.PaperGraph.show_topo_graph(V,E_raw,X)
                 # show pruned topo-graph
-                plot_tools.PaperGraph.show_topo_graph(V,E,X)
+                plot_tools.PaperGraph.show_topo_graph(V,E_final,X)
                 # show clustering results
                 plot_tools.autoPlot(X,Y)
             else:
                 # show pruned topo-graph
-                plot_tools.PaperGraph.show_topo_graph(V,E)
-        return Y#,t1,t2,t3,t4,t5
+                plot_tools.PaperGraph.show_topo_graph(V,E_final)
+        return Y,V,E_raw,X_extend,draw_tasks,final_cluster#,t1,t2,t3,t4,t5
 
 
 if __name__ =='__main__':
@@ -205,15 +186,11 @@ if __name__ =='__main__':
 
 
 
-    X,Y_true=DataLoader.load('circles')
-    K=int(0.6*np.sqrt(X.shape[0]))
+    X,Y_true=DataLoader.load('impossible')
 
-    Y_pred=api.DGSFC.fit(  X,
-                    K_d=K,
-                    K_s=K,
-                    alpha=0.4,
-                    epsilon=100,
-                    # density_type='NKD',
+    Y_pred,V,E_raw,X_extend,draw_tasks,final_cluster=api.GIT.fit(  X,
+                    k=8,
+                    target_ratio=[2, 2, 1, 1, 1, 1, 1],
                     plot=False,
                     )
     # plot_tools.autoPlot(X,Y_pred)

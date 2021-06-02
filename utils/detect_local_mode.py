@@ -8,12 +8,12 @@ class LCluster:
         pass
 
     @classmethod
-    def detect_descending_manifolds(self,X,K_d,K_s,scale):
+    def detect_descending_manifolds(self,X,K_d,K_s):
         extend=np.arange(0,X.shape[0]).reshape(-1,1).repeat(4,axis=1) # extend 4 dim, representing $density $ID $local clusters $ label
         X_extend=np.hstack([X,extend])
 
         t0=time.time()
-        Dis=KDE_DIS(X_extend[:,:-4],K=K_d,scale=scale)
+        Dis=KDE_DIS(X_extend[:,:-4],K=K_d)
         D,I = Dis.get_DI(X_extend[:,-3])
         P = Dis.get_density(X_extend[:,-3])
         t2=time.time()
@@ -51,7 +51,7 @@ class LCluster:
                         Boundary.append((i,s,int(X_extend[i,-2]),int(X_extend[s,-2])))
             
             if index%draw_step==0:
-                draw_tasks.append( (X[:,:2],X[:,-2],Back_mask.copy(),index) )
+                draw_tasks.append( (X[:,:2],X[:,-2],Back_mask.copy(),index) ) # points, local clusters, Back_mask, time index
             
             idx.remove(i) # delete point i
         

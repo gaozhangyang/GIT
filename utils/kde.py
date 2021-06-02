@@ -58,7 +58,7 @@ from sklearn.neighbors import NearestNeighbors
 
 
 class KDE_DIS():
-    def __init__(self,dataset,K,scale,n_jobs=100):
+    def __init__(self,dataset,K,n_jobs=100):
         self.dataset=dataset
         scales = self.get_scales(self.dataset)
         self.index = np.where(np.array(scales) != 0.0)[0]
@@ -73,10 +73,14 @@ class KDE_DIS():
         N = dataset.shape[0]
         self.D = np.hstack([np.zeros(N).reshape(-1,1),self.D])
         self.I = np.hstack([np.arange(N).reshape(-1,1),self.I])
-        D = self.D/np.sqrt(dataset.shape[1])
-        EXP = np.exp(-D[:,1:]**2)
-        self.P = np.mean(EXP,axis=1)
-        self.scale=scale
+        name = 'local_density'
+        if name=='knn_density':
+            self.P = 1/self.D[:,-1]**self.dataset.shape[1]
+
+        if name=='local_density':
+            D = self.D/np.sqrt(dataset.shape[1])
+            EXP = np.exp(-D[:,1:]**2)
+            self.P = np.mean(EXP,axis=1)
     
     def get_scales(self,X_observed):
         X_ = X_observed[:,:]

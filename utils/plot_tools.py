@@ -10,8 +10,8 @@ from multiprocessing import Pool,Manager,Process
 import numpy as np
 
 
-def autoPlot(data,y=None,continues=False,seed=2020,area=None):
-    plt.figure(figsize=(4, 4))
+def autoPlot(data,y=None,continues=False,seed=2020,area=None,svfile=None,axis='on',dpi=80):
+    plt.figure(figsize=(4, 4),dpi=dpi)
     if type(y)==np.ndarray:
         y=y.reshape(-1)
 
@@ -19,6 +19,10 @@ def autoPlot(data,y=None,continues=False,seed=2020,area=None):
         ax = plt.subplot(111)
         ax.scatter(data[:,0], data[:,1])
         plt.axis('equal')
+        if axis=='off':
+            plt.axis('off')
+        if svfile is not None:
+            plt.savefig(svfile,bbox_inches = 'tight',pad_inches = 0)
         plt.show()
         return
 
@@ -32,6 +36,10 @@ def autoPlot(data,y=None,continues=False,seed=2020,area=None):
             ax.scatter(data[:,0], data[:,1], data[:,2],c=y)
             
         plt.axis('equal')
+        if axis=='off':
+            plt.axis('off')
+        if svfile is not None:
+            plt.savefig(svfile,bbox_inches = 'tight',pad_inches = 0)
         plt.show()
     
     if not continues:
@@ -59,7 +67,12 @@ def autoPlot(data,y=None,continues=False,seed=2020,area=None):
             ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1], data[noise_mask][:,2],c=hashColor(y[noise_mask]),alpha=0.1)
 
         plt.axis('equal')
+        if axis=='off':
+            plt.axis('off')
+        if svfile is not None:
+            plt.savefig(svfile,bbox_inches = 'tight',pad_inches = 0)
         plt.show()
+        
 
     
 import plotly.graph_objects as go
@@ -261,7 +274,7 @@ class PaperGraph:
         plt.show()
     
     @classmethod
-    def show_topo_graph(self,V,E,X=None,fileroot=None,fileidx=1000):
+    def show_topo_graph(self,V,E,X=None,fileroot=None,fileidx=1000,with_labels=False):
         plt.figure(figsize=(4, 4))
         G = nx.Graph()
         G.add_nodes_from(V.keys())
@@ -277,7 +290,7 @@ class PaperGraph:
             for i in V.keys():
                 pos[i]=X[V[i]].mean(axis=0)
 
-        nx.draw_networkx(G,pos,with_labels=False,node_size =50)
+        nx.draw_networkx(G,pos,with_labels=with_labels,node_size =50)
         edge_labels = nx.get_edge_attributes(G, 'weight')
         edge_labels={key:'{:.2f}'.format(val) for key,val in edge_labels.items()}
         nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)

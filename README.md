@@ -16,9 +16,9 @@ The pipeline is shown as below:
 
 We show the process of clustering on toy datasets as follows:
 
-<center class="half">
+<p float="left">
     <img src="./readme_figures/circles.gif" width="125"/><img src="./readme_figures/impossible.gif" width="125"/><img src="./readme_figures/moons.gif" width="125"/><img src="./readme_figures/s-set.gif" width="125"/><img src="./readme_figures/smile.gif" width="125"/>
-</center>
+</p>
 
 ## Overview
 

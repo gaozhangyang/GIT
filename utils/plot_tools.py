@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-import imageio
+# import imageio
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import cla
 import networkx as nx
@@ -147,19 +147,20 @@ class GIFPloter():
 
 
     def SaveGIF(self,name,fps=1):
-        path = self.root
-        gif_images_path = os.listdir(path+'/')
+        pass
+        # path = self.root
+        # gif_images_path = os.listdir(path+'/')
 
-        gif_images_path=[img for img in gif_images_path if img[-4:]=='.png']
-        gif_images_path=sorted(gif_images_path,key=lambda x:int(x[:-4]))
-        gif_images = []
-        for i, path_ in enumerate(gif_images_path):
-            print(path_)
-            if '.png' in path_:
-                if i % 1 == 0:
-                    gif_images.append(imageio.imread(path+'/'+path_))
+        # gif_images_path=[img for img in gif_images_path if img[-4:]=='.png']
+        # gif_images_path=sorted(gif_images_path,key=lambda x:int(x[:-4]))
+        # gif_images = []
+        # for i, path_ in enumerate(gif_images_path):
+        #     print(path_)
+        #     if '.png' in path_:
+        #         if i % 1 == 0:
+        #             gif_images.append(imageio.imread(path+'/'+path_))
                     
-        imageio.mimsave(path+'/'+"{}.gif".format(name), gif_images, fps=fps)
+        # imageio.mimsave(path+'/'+"{}.gif".format(name), gif_images, fps=fps)
 
 
 

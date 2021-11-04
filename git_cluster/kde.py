@@ -16,7 +16,7 @@ class KDE_DIS():
         self.index = np.where(np.array(scales) != 0.0)[0]
         self.A=1 / (np.array(scales)[self.index])
         self.K = K 
-        self.dataset_=np.matmul(self.dataset[:, self.index],np.diag(self.A))
+        self.dataset_ = np.matmul(self.dataset[:, self.index],np.diag(self.A))
         self.NN = NearestNeighbors(n_neighbors=self.K, metric='minkowski', p=2,metric_params=None, n_jobs=n_jobs).fit(self.dataset_)
         self.G = self.NN.kneighbors_graph(X=None, n_neighbors=self.K, mode='distance')
         self.D = self.G.data.reshape(-1,self.K)

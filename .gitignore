@@ -121,6 +121,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 results/
+figs/
+*.pdf
+*.pkl
+
 *.gz
 *-ubyte
 *.pt

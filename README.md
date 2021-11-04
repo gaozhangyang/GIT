@@ -25,9 +25,10 @@ We show the process of clustering on toy datasets as follows:
 * `git_cluster/` contains the core algorithm.
 * `dataloaders/` contains dataloader classes for different datasets.
 * `utils/` includes measurements and plot tools for understanding clustering 150.
-* `ex1_toy/` is reproducing experiments on toy datasets.
-* `ex2_real/` is reproducing experiments on real datasets.
-* `ex3_mnist/` is reproducing experiments on mnist and fashion-mnist datasets.
+* `1-Accuracy/` ...
+* `2-Speed/` ...
+* `3-Robustness/` ...
+* `5-Dimension_reduction/` ...
 
 ## Installation
 
@@ -86,6 +87,8 @@ Y_pred = git.fit_predict(X)
 * plotly==5.3.1
 * scikit-learn==0.23.2
 * scipy==1.7.1
+* numpy==1.20.0
+* pydpc==0.1.3
 
 ### Reproducing steps
 (1) We have provided an environment setting file of conda. Users can easily reproduce the environment by the following commands:

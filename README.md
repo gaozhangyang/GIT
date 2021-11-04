@@ -31,6 +31,16 @@ We show the process of clustering on toy datasets as follows:
 
 ## Installation
 
+### Install from release code
+
+Install the latest version from the GitHub repository via:
+
+```
+pip install git+https://github.com/gaozhangyang/GIT
+```
+
+### Install from source code
+
 Build `setup.py` and install GIT:
 
 ```
@@ -78,22 +88,36 @@ Y_pred = git.fit_predict(X)
 * scipy==1.7.1
 
 ### Reproducing steps
-1. We have provided an environment setting file of conda. Users can easily reproduce the environment by the following commands:
+(1) We have provided an environment setting file of conda. Users can easily reproduce the environment by the following commands:
 
 ```
   conda env create -f environment.yml
   conda activate git_cluster
 ```
 
-2. We compare our method with various clustering methods, among which Quichshift++ requires an extra installation. Users should follows the usages from [its official github repository](https://github.com/google/quickshift). Here, we recommend users run the following commands:
+(2) We compare our method with various clustering methods, among which [Quichshift++](https://github.com/google/quickshift), [DPA](https://github.com/mariaderrico/DPA), [Spectacl](https://bitbucket.org/Sibylse/spectacl/src/master/) require an extra installation. Users should follows the usages from their official github repositories. 
+
+We recommend users run the following commands:
+
+* To install Quichshift++:
 
 ```
-git clone git@github.com:google/quickshift.git
-cd quickshift
-python setup.py build; python setup.py install
+pip install git+https://github.com/google/quickshift
 ```
 
-3. Open the jupyter notebooks in `ex1_toy`, `ex2_realdata`, `ex3_mnist`.
+* To install DPA:
+
+```
+pip install git+https://github.com/mariaderrico/DPA
+```
+
+* To install Spectacl:
+
+```
+pip install git+https://bitbucket.org/Sibylse/spectacl/src/master/
+```
+
+(3) Open the jupyter notebooks in `ex1_toy`, `ex2_realdata`, `ex3_mnist`.
 
 ## Citation
 If you find this code or idea useful, please cite our work:

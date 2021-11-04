@@ -29,9 +29,24 @@ We show the process of clustering on toy datasets as follows:
 * `ex2_real/` is reproducing experiments on real datasets.
 * `ex3_mnist/` is reproducing experiments on mnist and fashion-mnist datasets.
 
+## Installation
+
+Build `setup.py` and install GIT:
+
+```
+python setup.py build
+python setup.py install
+```
+
+Try to import the package:
+
+```
+from git_cluster import GIT
+```
+
 ## Usage 
 
-Here, we take the toy dataset `circles` as an example.
+We have provided `quick_start.ipynb` as an example, and users can refer this notebook.
 
 We first read the data through `toy_dataloader`:
 
@@ -40,16 +55,15 @@ from dataloaders import Toy_DataLoader as DataLoader
 X, Y_true = Dataloader(name='circles).load()
 ```
 
-Then, build GIT class and choose decent hyperparameters `K_d`, `K_s`, `alpha`, `epsilon`:
+Then, build GIT class and choose decent hyperparameters `k`:
 ```
 from git_cluster import GIT
-git = GIT(K_d=12, K_s=11, alpha=0.20, \
-                  epsilon=0.0, scale=True)
+git = GIT(k=10)
 ```
 
 The predicted results are available through `fit` method.
 ```
-Y_pred = git.fit(X)
+Y_pred = git.fit_predict(X)
 ```
 
 

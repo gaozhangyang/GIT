@@ -117,7 +117,7 @@ pip install git+https://github.com/mariaderrico/DPA
 pip install git+https://bitbucket.org/Sibylse/spectacl/src/master/
 ```
 
-(3) Open the jupyter notebooks in `ex1_toy`, `ex2_realdata`, `ex3_mnist`.
+(3) Open the jupyter notebooks in `1-Accuracy`, `2-Speed`, `3-Robustness`, `5-Dimension_reduction`.
 
 ## Citation
 If you find this code or idea useful, please cite our work:

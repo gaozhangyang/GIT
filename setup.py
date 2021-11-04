@@ -2,7 +2,7 @@ from setuptools import setup
 
 requirements = [
     'scikit-learn==0.23.2',
-    'numpy==1.19.2',
+    'numpy==1.20.0',
     'scipy==1.7.1'
 ]
 

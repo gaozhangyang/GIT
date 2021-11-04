@@ -5,7 +5,12 @@ from sklearn.neighbors import NearestNeighbors
 
 
 class KDE_DIS():
-    def __init__(self,dataset,K,n_jobs=100):
+    def __init__(
+        self,
+        dataset,
+        K,
+        n_jobs=100
+    ):
         self.dataset=dataset
         scales = self.get_scales(self.dataset)
         self.index = np.where(np.array(scales) != 0.0)[0]

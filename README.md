@@ -2,7 +2,7 @@
 
 This repository contains the implementation code for [paper](https://doi.org/10.1093/bioinformatics/btaa1005):<br>__GIT: Clustering Based on Graph of Intensity Topology__<br>
 
-If you found this package useful, please cite:
+<!-- If you found this package useful, please cite:
 ```
 @article{gao2021git,
   title={Git: Clustering Based on Graph of Intensity Topology},
@@ -10,7 +10,7 @@ If you found this package useful, please cite:
   journal={arXiv preprint arXiv:2110.01274},
   year={2021}
 }
-```
+``` -->
 
 ## Brief introduction
 

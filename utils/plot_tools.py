@@ -10,28 +10,39 @@ from multiprocessing import Pool,Manager,Process
 import numpy as np
 
 
-def autoPlot(data,y=None,continues=False,seed=2020,area=None):
-    plt.figure(figsize=(4, 4))
+def autoPlot(data,y=None,continues=False,seed=2020,area=None,svfile=None,axis='on',dpi=80,size=10,alpha=0.7):
+    plt.figure(figsize=(4, 4),dpi=dpi)
     if type(y)==np.ndarray:
         y=y.reshape(-1)
 
     if y is None:
         ax = plt.subplot(111)
-        ax.scatter(data[:,0], data[:,1])
-        plt.axis('equal')
+        ax.scatter(data[:,0], data[:,1],s=size,alpha=alpha)
+        if axis=='off':
+            for key, spine in ax.spines.items(): # 取消边框
+                spine.set_visible(False)
+            plt.axis('off')
+        if svfile is not None:
+            plt.savefig(svfile,bbox_inches = 'tight',pad_inches = 0.02)
         plt.show()
         return
 
     if continues:
         if data.shape[1]==2:
             ax = plt.subplot(111)
-            ax.scatter(data[:,0], data[:,1],c=y)
+            ax.scatter(data[:,0], data[:,1],c=y,s=size,alpha=alpha)
 
         if data.shape[1]==3:
             ax = plt.subplot(111, projection='3d')
-            ax.scatter(data[:,0], data[:,1], data[:,2],c=y)
-            
+            ax.scatter(data[:,0], data[:,1], data[:,2],c=y,s=size,alpha=alpha)
+        
+        for key, spine in ax.spines.items(): # 取消边框
+            spine.set_visible(False)
         plt.axis('equal')
+        if axis=='off':
+            plt.axis('off')
+        if svfile is not None:
+            plt.savefig(svfile,bbox_inches = 'tight',pad_inches = 0.02)
         plt.show()
     
     if not continues:
@@ -40,6 +51,7 @@ def autoPlot(data,y=None,continues=False,seed=2020,area=None):
         random.shuffle(colors)
         colors={i:colors[i] for i in range(max(y)+1)}
         colors[-1]='gray'
+        colors[-2]='red'
         hashColor=lambda y:[colors[one] for one in y]
         noise_mask=(y==-1)
         
@@ -47,19 +59,84 @@ def autoPlot(data,y=None,continues=False,seed=2020,area=None):
         if data.shape[1]==2:
             ax = plt.subplot(111)
             if area is None:
-                ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1],c=hashColor(y[~noise_mask]))
-                ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1],c=hashColor(y[noise_mask]),alpha=0.1)
+                ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1],c=hashColor(y[~noise_mask]),s=size,alpha=alpha)
+                ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1],c=hashColor(y[noise_mask]),alpha=0.1,s=size)
             else:
                 ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1],c=hashColor(y[~noise_mask]), s=25 * area[~noise_mask].astype(np.float64) ** 3, alpha=0.5)
                 ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1],c=hashColor(y[noise_mask]), s=area[noise_mask].astype(np.float64), alpha=0.1)
+            plt.axis('equal')
 
         if data.shape[1]==3:
             ax = plt.subplot(111, projection='3d')
-            ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1], data[~noise_mask][:,2],c=hashColor(y[~noise_mask]))
-            ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1], data[noise_mask][:,2],c=hashColor(y[noise_mask]),alpha=0.1)
+            ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1], data[~noise_mask][:,2],c=hashColor(y[~noise_mask]),s=size)
+            ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1], data[noise_mask][:,2],c=hashColor(y[noise_mask]),alpha=0.1,s=size)
 
-        plt.axis('equal')
+        
+        if axis=='off':
+            # plt.axis('off')
+            plt.xticks([])
+            plt.yticks([])
+            if data.shape[1]==3:
+                ax.set_zticks([])
+
+            for key, spine in ax.spines.items(): # 取消边框
+                spine.set_visible(False)
+        
+        if svfile is not None:
+            plt.savefig(svfile,bbox_inches = 'tight',pad_inches = 0.02)
         plt.show()
+
+# def autoPlot(data,y=None,continues=False,seed=2020,area=None):
+#     plt.figure(figsize=(4, 4))
+#     if type(y)==np.ndarray:
+#         y=y.reshape(-1)
+
+#     if y is None:
+#         ax = plt.subplot(111)
+#         ax.scatter(data[:,0], data[:,1])
+#         plt.axis('equal')
+#         plt.show()
+#         return
+
+#     if continues:
+#         if data.shape[1]==2:
+#             ax = plt.subplot(111)
+#             ax.scatter(data[:,0], data[:,1],c=y)
+
+#         if data.shape[1]==3:
+#             ax = plt.subplot(111, projection='3d')
+#             ax.scatter(data[:,0], data[:,1], data[:,2],c=y)
+            
+#         plt.axis('equal')
+#         plt.show()
+    
+#     if not continues:
+#         colors=['C{}'.format(i) for i in range(max(y)+1)]
+#         random.seed(seed)
+#         random.shuffle(colors)
+#         colors={i:colors[i] for i in range(max(y)+1)}
+#         colors[-1]='gray'
+#         hashColor=lambda y:[colors[one] for one in y]
+#         noise_mask=(y==-1)
+        
+
+#         if data.shape[1]==2:
+#             ax = plt.subplot(111)
+#             if area is None:
+#                 ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1],c=hashColor(y[~noise_mask]))
+#                 ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1],c=hashColor(y[noise_mask]),alpha=0.1)
+#             else:
+#                 ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1],c=hashColor(y[~noise_mask]), s=25 * area[~noise_mask].astype(np.float64) ** 3, alpha=0.5)
+#                 ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1],c=hashColor(y[noise_mask]), s=area[noise_mask].astype(np.float64), alpha=0.1)
+#             plt.axis('equal')
+        
+
+#         if data.shape[1]==3:
+#             ax = plt.subplot(111, projection='3d')
+#             ax.scatter(data[~noise_mask][:,0], data[~noise_mask][:,1], data[~noise_mask][:,2],c=hashColor(y[~noise_mask]))
+#             ax.scatter(data[noise_mask][:,0], data[noise_mask][:,1], data[noise_mask][:,2],c=hashColor(y[noise_mask]),alpha=0.1)
+
+#         plt.show()
 
     
 import plotly.graph_objects as go

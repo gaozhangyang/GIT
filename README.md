@@ -1,6 +1,6 @@
 # GIT: Clustering Based on Graph of Intensity Topology 
 
-This repository contains the implementation code for [paper](https://doi.org/10.1093/bioinformatics/btaa1005):<br>__GIT: Clustering Based on Graph of Intensity Topology__<br>
+This repository contains the implementation code for [paper](https://arxiv.org/abs/2110.01274):<br>__GIT: Clustering Based on Graph of Intensity Topology__<br>
 
 <!-- If you found this package useful, please cite:
 ```
